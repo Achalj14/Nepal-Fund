@@ -78,7 +78,10 @@ function selectAmount(amt, el) {
   document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
   if (el) el.classList.add('active');
 
-  // Update form input
+  // Update inputs
+  const step1Amt = document.getElementById('step1CustomAmount');
+  if (step1Amt) step1Amt.value = amt;
+
   const formAmt = document.getElementById('formAmount');
   if (formAmt) formAmt.value = amt;
 
@@ -188,18 +191,43 @@ function copyUpiId() {
 
 // Initialize listeners on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
-  // Sync form amount input with QR
+  const step1Amt = document.getElementById('step1CustomAmount');
   const formAmt = document.getElementById('formAmount');
-  if (formAmt) {
-    formAmt.addEventListener('input', (e) => {
-      const val = parseFloat(e.target.value);
-      if (val && val > 0) {
-        currentAmount = val;
-        // Deselect pills if custom amount
-        document.querySelectorAll('.pill-btn').forEach(btn => btn.classList.remove('active'));
-        updateQRCode();
+
+  function handleAmountChange(newVal, sourceInput) {
+    const val = parseFloat(newVal);
+    if (!isNaN(val) && val > 0) {
+      currentAmount = val;
+      
+      // Sync the other input
+      if (sourceInput === step1Amt && formAmt) {
+        formAmt.value = val;
+      } else if (sourceInput === formAmt && step1Amt) {
+        step1Amt.value = val;
       }
-    });
+
+      // Check if amount matches any preset pill
+      let matchedPill = false;
+      document.querySelectorAll('.pill-btn').forEach(btn => {
+        const btnText = btn.innerText.replace(/[^0-9]/g, '');
+        if (parseFloat(btnText) === val) {
+          btn.classList.add('active');
+          matchedPill = true;
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      updateQRCode();
+    }
+  }
+
+  if (step1Amt) {
+    step1Amt.addEventListener('input', (e) => handleAmountChange(e.target.value, step1Amt));
+  }
+
+  if (formAmt) {
+    formAmt.addEventListener('input', (e) => handleAmountChange(e.target.value, formAmt));
   }
 
   // Handle Form Submission
@@ -249,7 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Reset form
         form.reset();
-        document.getElementById('formAmount').value = currentAmount;
+        const step1AmtEl = document.getElementById('step1CustomAmount');
+        const formAmtEl = document.getElementById('formAmount');
+        if (step1AmtEl) step1AmtEl.value = currentAmount;
+        if (formAmtEl) formAmtEl.value = currentAmount;
 
         // Refresh stats & donor wall
         loadCampaignData();

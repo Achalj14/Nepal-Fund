@@ -96,11 +96,28 @@
       <!-- Left Column: Dynamic UPI QR Code Card -->
       <div class="portal-card qr-section">
         <div class="card-title-group">
-          <h2 class="card-title">📱 Step 1: Scan & Pay with UPI</h2>
-          <p class="card-desc">Choose an amount below to generate a tailored dynamic QR code or pay directly from your mobile UPI app.</p>
+          <h2 class="card-title">📱 Step 1: Pay Any Amount via UPI</h2>
+          <p class="card-desc">Contribute any amount of your choice. Enter an amount below or pick a suggestion to generate a dynamic UPI QR code.</p>
         </div>
 
-        <div class="amount-selector-label">Select Contribution Amount</div>
+        <!-- Custom Any-Amount Input Field -->
+        <div class="custom-amount-card">
+          <label for="step1CustomAmount" class="amount-selector-label">Enter Contribution Amount</label>
+          <div class="amount-input-container">
+            <span class="currency-symbol">₹</span>
+            <input 
+              type="number" 
+              id="step1CustomAmount" 
+              placeholder="Enter any amount (e.g. 50, 500, 10000...)" 
+              min="1" 
+              step="any"
+              value="501"
+            >
+          </div>
+          <div class="input-hint" style="text-align: left; margin-top: 5px;">You can type any custom amount above (No upper or lower limit)</div>
+        </div>
+
+        <div class="amount-selector-label" style="margin-top: 14px;">Quick Suggestions (Click to fill)</div>
         <div class="amount-pills">
           <button type="button" class="pill-btn" onclick="selectAmount(101, this)">₹101</button>
           <button type="button" class="pill-btn" onclick="selectAmount(251, this)">₹251</button>

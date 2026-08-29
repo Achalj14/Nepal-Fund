@@ -6,6 +6,9 @@
 
 # dependencies
 /node_modules
+.env
+.env.local
+.env.*.local
 
 # IDEs and editors
 /.idea

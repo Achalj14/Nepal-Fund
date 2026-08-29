@@ -108,6 +108,11 @@ async function loadCampaignData() {
   updateQRCode();
 
   // Load live stats
+  await refreshLiveStats();
+}
+
+// Fetch and update live statistics
+async function refreshLiveStats() {
   try {
     const statsRes = await fetch(`${window.CONFIG.BACKEND_API_URL}/api/stats`);
     if (statsRes.ok) {
@@ -117,13 +122,12 @@ async function loadCampaignData() {
 
       if (raisedEl) raisedEl.innerText = `₹${Number(stats.total_raised).toLocaleString('en-IN')}`;
       if (donorsEl) donorsEl.innerText = Number(stats.total_donors).toLocaleString('en-IN');
+      return true;
     }
   } catch (err) {
-    console.warn('Could not fetch stats:', err);
+    console.warn('Could not fetch stats (backend may be waking up):', err);
   }
-
-  // Load recent donors list
-  loadRecentDonors();
+  return false;
 }
 
 // Fetch Recent Donors
@@ -262,6 +266,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load initial campaign data
   loadCampaignData();
+
+  // Retry after 3s & 8s in case backend was waking up from cold-sleep
+  setTimeout(() => refreshLiveStats(), 3000);
+  setTimeout(() => refreshLiveStats(), 8000);
+
+  // Poll stats every 30 seconds
+  setInterval(() => refreshLiveStats(), 30000);
 });
 
 // Expose globals

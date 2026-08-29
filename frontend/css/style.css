@@ -520,29 +520,64 @@ a:hover {
   background: rgba(255, 107, 0, 0.2);
 }
 
-/* Pay via UPI Mobile Button */
-.btn-upi-mobile {
-  width: 100%;
-  padding: 14px;
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-md);
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Specific UPI App Buttons Grid */
+.upi-apps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-  transition: all 0.2s ease;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
-.btn-upi-mobile:hover {
+.btn-upi-app {
+  padding: 12px 10px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: #fff;
+}
+
+.btn-upi-app:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  filter: brightness(1.15);
+  text-decoration: none;
+}
+
+.btn-upi-app.gpay {
+  background: #ffffff;
+  color: #1f2937;
+  border-color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+}
+
+.btn-upi-app.phonepe {
+  background: linear-gradient(135deg, #6739b7, #5f259f);
+  box-shadow: 0 4px 12px rgba(103, 57, 183, 0.35);
+}
+
+.btn-upi-app.paytm {
+  background: linear-gradient(135deg, #00b9f5, #002e6e);
+  box-shadow: 0 4px 12px rgba(0, 185, 245, 0.35);
+}
+
+.btn-upi-app.bhim {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.btn-upi-app.any-upi {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #10b981, #059669);
+  padding: 14px;
+  font-size: 1rem;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .supported-apps {

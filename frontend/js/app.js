@@ -60,14 +60,42 @@ function updateQRCode() {
   // Update visual text indicators
   const badge = document.getElementById('qrAmountBadge');
   if (badge) badge.innerText = `Scan to Pay ₹${Number(amtNum).toLocaleString('en-IN')}`;
+}
 
-  // Update mobile UPI link button
-  const mobileBtn = document.getElementById('btnPayUpiMobile');
-  if (mobileBtn) {
-    mobileBtn.onclick = () => {
-      window.location.href = upiUrl;
-    };
+// Pay via Specific UPI App (GPay / PhonePe / Paytm / BHIM / Generic)
+function payViaApp(app) {
+  const amtNum = parseFloat(currentAmount) || 1;
+  const formattedAmt = amtNum.toFixed(2);
+  const params = `pa=${encodeURIComponent(currentUpiId)}&pn=${encodeURIComponent(currentPayeeName)}&am=${formattedAmt}&cu=INR&tn=${encodeURIComponent("Nepal Relief - Vidarbha Dhol Tasha")}`;
+
+  let targetUrl = `upi://pay?${params}`;
+
+  if (app === 'gpay') {
+    targetUrl = `tez://upi/pay?${params}`;
+  } else if (app === 'phonepe') {
+    targetUrl = `phonepe://pay?${params}`;
+  } else if (app === 'paytm') {
+    targetUrl = `paytmmp://pay?${params}`;
+  } else if (app === 'bhim') {
+    targetUrl = `bhim://pay?${params}`;
   }
+
+  // Create temporary anchor and click
+  const link = document.createElement('a');
+  link.href = targetUrl;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  const appNames = {
+    gpay: 'Google Pay',
+    phonepe: 'PhonePe',
+    paytm: 'Paytm',
+    bhim: 'BHIM UPI',
+    generic: 'UPI App'
+  };
+
+  showToast(`Opening ${appNames[app] || 'Payment App'}...`);
 }
 
 // Select preset amount pills
@@ -309,3 +337,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Expose globals
 window.selectAmount = selectAmount;
 window.copyUpiId = copyUpiId;
+window.payViaApp = payViaApp;

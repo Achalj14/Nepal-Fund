@@ -148,10 +148,27 @@
           </div>
         </div>
 
-        <!-- Mobile Quick Pay Button -->
-        <button type="button" id="btnPayUpiMobile" class="btn-upi-mobile">
-          <span>⚡ Pay via UPI App (GPay / PhonePe / Paytm)</span>
-        </button>
+        <!-- Mobile 1-Tap App Payment Grid -->
+        <div style="margin-top: 16px; margin-bottom: 8px; font-size: 0.82rem; font-weight: 700; color: var(--primary-saffron-light); text-transform: uppercase; letter-spacing: 0.05em; text-align: left;">
+          ⚡ 1-Tap Pay with Your Preferred App:
+        </div>
+        <div class="upi-apps-grid">
+          <button type="button" class="btn-upi-app gpay" onclick="payViaApp('gpay')">
+            <span style="font-size: 1.1rem;">🔵</span> Google Pay
+          </button>
+          <button type="button" class="btn-upi-app phonepe" onclick="payViaApp('phonepe')">
+            <span style="font-size: 1.1rem;">🟣</span> PhonePe
+          </button>
+          <button type="button" class="btn-upi-app paytm" onclick="payViaApp('paytm')">
+            <span style="font-size: 1.1rem;">🔷</span> Paytm
+          </button>
+          <button type="button" class="btn-upi-app bhim" onclick="payViaApp('bhim')">
+            <span style="font-size: 1.1rem;">🇮🇳</span> BHIM UPI
+          </button>
+          <button type="button" class="btn-upi-app any-upi" onclick="payViaApp('generic')">
+            <span>⚡ Open Any Installed UPI App</span>
+          </button>
+        </div>
 
         <div class="supported-apps">
           <span>Supported: Google Pay • PhonePe • Paytm • BHIM • Cred • Any Bank UPI</span>

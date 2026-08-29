@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nepal Tragedy Relief Fund | Vidarbha Dhol Tasha Pathak</title>
+  <meta name="description" content="Official fundraiser by Vidarbha Dhol Tasha Pathak to support relief and rehabilitation for the tragic calamity in Nepal. Scan QR to contribute and receive instant digital receipt.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Emergency Relief Notification Banner -->
+  <div class="relief-banner">
+    <div class="pulse-dot"></div>
+    <span><strong>EMERGENCY RELIEF CAMPAIGN:</strong> Standing in solidarity with our brothers & sisters in Nepal 🇳🇵 🇮🇳 Every contribution brings urgent medical aid & shelter!</span>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="dhol-icon-badge">🥁</div>
+      <div class="brand-text">
+        <h2>विदर्भ ढोल ताशा पथक</h2>
+        <span>Vidarbha Dhol Tasha Pathak • Nagpur / Vidarbha</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="#donate-section" class="nav-btn" style="background: var(--primary-saffron); border-color: var(--primary-gold); color: #fff;">
+        ❤️ Donate Now
+      </a>
+      <a href="admin.html" class="nav-btn">
+        🔒 Admin Portal
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <div class="container">
+
+    <!-- Hero Header -->
+    <header class="hero-section">
+      <div class="hero-tag">🚩 Humanitarian Relief Mission</div>
+      <h1 class="hero-title">Nepal Tragedy Relief Fund</h1>
+      <p class="hero-subtitle">
+        In the wake of devastating calamities in Nepal, Vidarbha Dhol Tasha Pathak invites all vadaks, patrons, and kind-hearted citizens to contribute towards immediate relief, food supplies, and essential rehabilitation.
+      </p>
+    </header>
+
+    <!-- Live Open Relief Fund Stats Box -->
+    <section class="goal-card" aria-label="Campaign Impact Stats">
+      <div class="goal-header">
+        <div>
+          <div style="font-size: 0.85rem; color: var(--primary-saffron-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Total Relief Contributions Raised</div>
+          <div class="goal-raised" id="statTotalRaised">₹0</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 5px 14px; border-radius: 999px; font-size: 0.85rem; color: #10b981; font-weight: 700;">
+            <span class="pulse-dot" style="background-color: #10b981;"></span> Open Relief Fund (Any Amount)
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="margin-top: 10px; padding-top: 18px;">
+        <div class="stat-item">
+          <div class="stat-num" id="statTotalDonors">0</div>
+          <div class="stat-label">Generous Donors</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">No Upper Limit</div>
+          <div class="stat-label">Contribute Any Amount</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100% Direct</div>
+          <div class="stat-label">Relief Utilization</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">Instant</div>
+          <div class="stat-label">Digital Receipt</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Donation Split (QR Generator + Submission Form) -->
+    <section class="donation-grid" id="donate-section">
+      
+      <!-- Left Column: Dynamic UPI QR Code Card -->
+      <div class="portal-card qr-section">
+        <div class="card-title-group">
+          <h2 class="card-title">📱 Step 1: Scan & Pay with UPI</h2>
+          <p class="card-desc">Choose an amount below to generate a tailored dynamic QR code or pay directly from your mobile UPI app.</p>
+        </div>
+
+        <div class="amount-selector-label">Select Contribution Amount</div>
+        <div class="amount-pills">
+          <button type="button" class="pill-btn" onclick="selectAmount(101, this)">₹101</button>
+          <button type="button" class="pill-btn" onclick="selectAmount(251, this)">₹251</button>
+          <button type="button" class="pill-btn active" onclick="selectAmount(501, this)">₹501</button>
+          <button type="button" class="pill-btn" onclick="selectAmount(1001, this)">₹1,001</button>
+          <button type="button" class="pill-btn" onclick="selectAmount(2100, this)">₹2,100</button>
+          <button type="button" class="pill-btn" onclick="selectAmount(5001, this)">₹5,001</button>
+        </div>
+
+        <!-- Dynamic QR Display -->
+        <div class="qr-box-wrapper">
+          <div id="qrcode"></div>
+          <div class="qr-amount-badge" id="qrAmountBadge">Scan to Pay ₹501</div>
+        </div>
+
+        <!-- Official UPI Details -->
+        <div class="upi-details-box">
+          <div class="upi-row">
+            <span class="upi-label">Beneficiary</span>
+            <span class="upi-value" id="displayPayeeName">Vidarbha Dhol Tasha Pathak</span>
+          </div>
+          <div class="upi-row">
+            <span class="upi-label">UPI ID</span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="upi-value" id="displayUpiId">vidarbhadholtashapathak@upi</span>
+              <button type="button" class="copy-btn" onclick="copyUpiId()">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile Quick Pay Button -->
+        <button type="button" id="btnPayUpiMobile" class="btn-upi-mobile">
+          <span>⚡ Pay via UPI App (GPay / PhonePe / Paytm)</span>
+        </button>
+
+        <div class="supported-apps">
+          <span>Supported: Google Pay • PhonePe • Paytm • BHIM • Cred • Any Bank UPI</span>
+        </div>
+      </div>
+
+      <!-- Right Column: Verification & Details Submission Form -->
+      <div class="portal-card">
+        <div class="card-title-group">
+          <h2 class="card-title">📝 Step 2: Fill Details & Submit</h2>
+          <p class="card-desc">Enter your payment UTR / Transaction ID to generate your verified digital acknowledgement slip.</p>
+        </div>
+
+        <form id="donationForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="donorName">Full Name <span class="req">*</span></label>
+              <input type="text" id="donorName" name="donorName" placeholder="e.g. Rameshwar Patil" required minlength="2">
+            </div>
+            <div class="form-group">
+              <label for="donorPhone">WhatsApp / Mobile No. <span class="req">*</span></label>
+              <input type="tel" id="donorPhone" name="donorPhone" placeholder="e.g. 9876543210" required minlength="10" maxlength="15">
+              <div class="input-hint">Receipt will be linked to this number</div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="donorEmail">Email Address (Optional)</label>
+              <input type="email" id="donorEmail" name="donorEmail" placeholder="e.g. rameshwar@gmail.com">
+            </div>
+            <div class="form-group">
+              <label for="donorCity">City / State</label>
+              <input type="text" id="donorCity" name="donorCity" placeholder="e.g. Nagpur, Maharashtra">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="formAmount">Amount Paid (₹ INR) <span class="req">*</span></label>
+              <input type="number" id="formAmount" name="formAmount" min="1" step="1" value="501" required>
+            </div>
+            <div class="form-group">
+              <label for="paymentMode">Payment App Used</label>
+              <select id="paymentMode" name="paymentMode">
+                <option value="Google Pay">Google Pay (GPay)</option>
+                <option value="PhonePe">PhonePe</option>
+                <option value="Paytm">Paytm UPI</option>
+                <option value="BHIM UPI">BHIM UPI</option>
+                <option value="Cred">Cred</option>
+                <option value="Other Bank UPI">Other Bank UPI / NetBanking</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="utrNumber">UPI Reference / UTR Number / Txn ID <span class="req">*</span></label>
+            <input type="text" id="utrNumber" name="utrNumber" placeholder="12-digit UTR No. (e.g. 423589123456)" required minlength="4">
+            <div class="input-hint">Look in your GPay / PhonePe / Paytm payment receipt under "UPI Transaction ID" or "UTR"</div>
+          </div>
+
+          <div class="form-group">
+            <label for="donorMessage">Words of Support / Prayers for Nepal (Optional)</label>
+            <textarea id="donorMessage" name="donorMessage" rows="2" placeholder="Send your prayers, blessings, or message of solidarity..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-group">
+              <input type="checkbox" id="isAnonymous">
+              <span>Make this donation anonymous on the public donor wall</span>
+            </label>
+          </div>
+
+          <button type="submit" id="btnSubmitForm" class="btn-submit">
+            <span>🙏</span> Submit Donation & Get Official Receipt
+          </button>
+        </form>
+      </div>
+
+    </section>
+
+    <!-- Information / Transparency Guide Banner -->
+    <div class="info-banner-box">
+      <div class="info-icon">🤝</div>
+      <div class="info-text">
+        <h4>100% Transparent & Community Driven</h4>
+        <p>All funds collected through this official portal are directly utilized by Vidarbha Dhol Tasha Pathak for on-ground relief materials, dry food rations, medicines, and winter supplies dispatched to affected regions in Nepal. Every contribution is publicly acknowledged and verifiable.</p>
+      </div>
+    </div>
+
+    <!-- Live Recent Donors Wall -->
+    <section class="donors-section">
+      <div class="section-header">
+        <h2 class="section-title">🌟 Recent Contributors & Prayers</h2>
+        <p style="color: var(--text-muted);">Heartfelt gratitude to everyone extending a helping hand to Nepal.</p>
+      </div>
+      
+      <div class="donor-cards-grid" id="donorCardsContainer">
+        <!-- Loaded dynamically via JavaScript -->
+        <div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 30px;">
+          Loading recent donors...
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Modal for Instant Digital Receipt -->
+  <div class="modal-backdrop" id="receiptModal">
+    <div class="modal-content">
+      <button type="button" class="modal-close" onclick="closeReceiptModal()">&times;</button>
+      
+      <!-- Receipt Paper View -->
+      <div class="receipt-paper" id="receiptPaperContent">
+        <!-- Rendered via receipt.js -->
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="receipt-actions">
+        <button type="button" class="btn-print" onclick="printReceipt()">
+          <span>🖨️</span> Download / Print PDF
+        </button>
+        <button type="button" class="btn-share-wa" id="btnShareWhatsApp">
+          <span>💬</span> Share on WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <p style="font-weight: 700; color: #fff; font-size: 1rem;">🚩 विदर्भ ढोल ताशा पथक • Vidarbha Dhol Tasha Pathak</p>
+      <p>Dedicated to Indian Culture, Social Service, and Humanitarian Support.</p>
+      <p style="margin-top: 14px; font-size: 0.75rem;">
+        For inquiries & verification: <a href="admin.html">Admin Portal</a> • Transparency Ledger • Nagpur, Maharashtra, India
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/receipt.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

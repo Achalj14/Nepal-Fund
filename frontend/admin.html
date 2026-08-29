@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Portal | Vidarbha Dhol Tasha Pathak - Nepal Relief</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .admin-container {
+      max-width: 1300px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .admin-table-wrapper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      overflow-x: auto;
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(16px);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    th {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--primary-saffron-light);
+      padding: 12px 14px;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border-subtle);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .btn-verify {
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+    .btn-verify.verified {
+      background: #059669;
+      color: #fff;
+    }
+    .btn-verify.pending {
+      background: #d97706;
+      color: #fff;
+    }
+    .admin-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .btn-export {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="dhol-icon-badge">🥁</div>
+      <div class="brand-text">
+        <h2>विदर्भ ढोल ताशा पथक</h2>
+        <span>Admin & Financial Audit Dashboard</span>
+      </div>
+    </div>
+    <div class="nav-actions">
+      <a href="index.html" class="nav-btn">
+        ⬅️ Back to Donor Page
+      </a>
+    </div>
+  </nav>
+
+  <div class="admin-container">
+    
+    <!-- Admin Login Card (Shown if not authenticated) -->
+    <div class="portal-card" id="adminLoginCard" style="max-width: 480px; margin: 60px auto;">
+      <div class="card-title-group">
+        <h2 class="card-title">🔒 Admin Verification Login</h2>
+        <p class="card-desc">Enter your administrative authorization secret to access donor audit logs and export spreadsheets.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="adminSecretInput">Admin Secret Key</label>
+        <input type="password" id="adminSecretInput" placeholder="Enter secret (default: vidarbha@admin2026)" value="vidarbha@admin2026">
+        <div class="input-hint">Set via ADMIN_SECRET environment variable in backend</div>
+      </div>
+
+      <button type="button" onclick="loginAdmin()" class="btn-submit">
+        <span>🔓</span> Login to Dashboard
+      </button>
+    </div>
+
+    <!-- Admin Dashboard (Hidden until login) -->
+    <div id="adminDashboard" style="display: none;">
+      
+      <div class="admin-bar">
+        <div>
+          <h1 style="font-size: 1.8rem;">Donations & UTR Audit Ledger</h1>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Review donor transactions, verify against bank statements, and export data.</p>
+        </div>
+        <div>
+          <button type="button" class="btn-export" onclick="exportCsv()">
+            <span>📥</span> Export CSV (Excel)
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt No</th>
+              <th>Donor Name & City</th>
+              <th>Contact Details</th>
+              <th>Amount</th>
+              <th>UTR / Mode</th>
+              <th>Date & Time</th>
+              <th>Status</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody">
+            <!-- Rendered by admin.js -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

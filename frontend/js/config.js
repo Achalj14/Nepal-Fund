@@ -5,9 +5,9 @@
 const CONFIG = {
   // Local default: http://127.0.0.1:8000
   // When hosted on Render/Railway, change this to: "https://your-backend-service.onrender.com"
-  BACKEND_API_URL: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+   BACKEND_API_URL: window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     ? "http://127.0.0.1:8000"
-    : "https://vidarbha-nepal-relief-backend.onrender.com", // Fallback / placeholder for production
+    : "https://nepal-fund.onrender.com",
 
   // Default UPI info if backend is momentarily sleeping / offline
   DEFAULT_UPI_ID: "vidarbhadholtashapathak@upi",

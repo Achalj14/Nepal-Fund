@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "node ./node_modules/@angular/cli/bin/bootstrap.js",
     "start": "node ./node_modules/@angular/cli/bin/bootstrap.js serve",
-    "build": "node ./node_modules/@angular/cli/bin/bootstrap.js build",
+    "build": "node set-env.js && node ./node_modules/@angular/cli/bin/bootstrap.js build",
     "watch": "node ./node_modules/@angular/cli/bin/bootstrap.js build --watch --configuration development"
   },
   "dependencies": {

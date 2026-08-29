@@ -1,0 +1,349 @@
+<!-- Emergency Relief Notification Banner -->
+<div class="relief-banner">
+  <div class="pulse-dot"></div>
+  <span><strong>EMERGENCY RELIEF CAMPAIGN:</strong> Standing in solidarity with our brothers & sisters in Nepal 🇳🇵 🇮🇳 Every contribution brings urgent medical aid & shelter!</span>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="dhol-icon-badge">🥁</div>
+    <div class="brand-text">
+      <h2>विदर्भ ढोल ताशा पथक</h2>
+      <span>Vidarbha Dhol Tasha Pathak • Nagpur / Vidarbha</span>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <a href="#donate-section" class="nav-btn" style="background: var(--primary-saffron); border-color: var(--primary-gold); color: #fff;">
+      ❤️ Donate Now
+    </a>
+    <a routerLink="/admin" class="nav-btn">
+      🔒 Admin Portal
+    </a>
+  </div>
+</nav>
+
+<!-- Main Container -->
+<div class="container">
+
+  <!-- Hero Header -->
+  <header class="hero-section">
+    <div class="hero-tag">🚩 Humanitarian Relief Mission</div>
+    <h1 class="hero-title">Nepal Tragedy Relief Fund</h1>
+    <p class="hero-subtitle">
+      In the wake of devastating calamities in Nepal, Vidarbha Dhol Tasha Pathak invites all vadaks, patrons, and kind-hearted citizens to contribute towards immediate relief, food supplies, and essential rehabilitation.
+    </p>
+  </header>
+
+  <!-- Live Open Relief Fund Stats Box -->
+  <section class="goal-card" aria-label="Campaign Impact Stats">
+    <div class="goal-header">
+      <div>
+        <div style="font-size: 0.85rem; color: var(--primary-saffron-light); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Total Relief Contributions Raised</div>
+        <div class="goal-raised">₹{{ stats.total_raised | number:'1.0-0' }}</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); padding: 5px 14px; border-radius: 999px; font-size: 0.85rem; color: #10b981; font-weight: 700;">
+          <span class="pulse-dot" style="background-color: #10b981;"></span> Open Relief Fund (Any Amount)
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: 10px; padding-top: 18px;">
+      <div class="stat-item">
+        <div class="stat-num">{{ stats.total_donors | number }}</div>
+        <div class="stat-label">Generous Donors</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">No Upper Limit</div>
+        <div class="stat-label">Contribute Any Amount</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">100% Direct</div>
+        <div class="stat-label">Relief Utilization</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Instant</div>
+        <div class="stat-label">Digital Receipt</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Donation Split (QR Generator + Submission Form) -->
+  <section class="donation-grid" id="donate-section">
+    
+    <!-- Left Column: Dynamic UPI QR Code Card -->
+    <div class="portal-card qr-section">
+      <div class="card-title-group">
+        <h2 class="card-title">📱 Step 1: Pay Any Amount via UPI</h2>
+        <p class="card-desc">Contribute any amount of your choice. Enter an amount below or pick a suggestion to generate a dynamic UPI QR code.</p>
+      </div>
+
+      <!-- Custom Any-Amount Input Field -->
+      <div class="custom-amount-card">
+        <label for="step1CustomAmount" class="amount-selector-label">Enter Contribution Amount</label>
+        <div class="amount-input-container">
+          <span class="currency-symbol">₹</span>
+          <input 
+            type="number" 
+            id="step1CustomAmount" 
+            [(ngModel)]="currentAmount" 
+            (input)="onAmountInput()"
+            placeholder="Enter any amount (e.g. 50, 500, 10000...)" 
+            min="1" 
+            step="any"
+          >
+        </div>
+        <div class="input-hint" style="text-align: left; margin-top: 5px;">You can type any custom amount above (No upper or lower limit)</div>
+      </div>
+
+      <div class="amount-selector-label" style="margin-top: 14px;">Quick Suggestions (Click to fill)</div>
+      <div class="amount-pills">
+        <button 
+          type="button" 
+          *ngFor="let amt of presetAmounts" 
+          class="pill-btn" 
+          [class.active]="currentAmount === amt" 
+          (click)="setAmount(amt)"
+        >
+          ₹{{ amt | number }}
+        </button>
+      </div>
+
+      <!-- Dynamic QR Display -->
+      <div class="qr-box-wrapper">
+        <div id="qrcode" *ngIf="qrDataUrl">
+          <img [src]="qrDataUrl" [alt]="'UPI QR Code for ₹' + currentAmount" width="220" height="220">
+        </div>
+        <div class="qr-amount-badge">Scan to Pay ₹{{ currentAmount | number }}</div>
+      </div>
+
+      <!-- Official UPI Details -->
+      <div class="upi-details-box">
+        <div class="upi-row">
+          <span class="upi-label">Beneficiary</span>
+          <span class="upi-value">{{ payeeName }}</span>
+        </div>
+        <div class="upi-row">
+          <span class="upi-label">UPI ID</span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="upi-value">{{ upiId }}</span>
+            <button type="button" class="copy-btn" (click)="copyUpiId()">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile 1-Tap App Payment Grid -->
+      <div style="margin-top: 16px; margin-bottom: 8px; font-size: 0.82rem; font-weight: 700; color: var(--primary-saffron-light); text-transform: uppercase; letter-spacing: 0.05em; text-align: left;">
+        ⚡ 1-Tap Pay with Your Preferred App:
+      </div>
+      <div class="upi-apps-grid">
+        <button type="button" class="btn-upi-app gpay" (click)="payViaApp('gpay')">
+          <img src="assets/images/icons8-google-pay.svg" alt="Google Pay" class="app-icon">
+          <span>Google Pay</span>
+        </button>
+        <button type="button" class="btn-upi-app phonepe" (click)="payViaApp('phonepe')">
+          <img src="assets/images/icons8-phone-pe.svg" alt="PhonePe" class="app-icon">
+          <span>PhonePe</span>
+        </button>
+        <button type="button" class="btn-upi-app paytm" (click)="payViaApp('paytm')">
+          <img src="assets/images/icons8-paytm.svg" alt="Paytm" class="app-icon">
+          <span>Paytm</span>
+        </button>
+        <button type="button" class="btn-upi-app bhim" (click)="payViaApp('bhim')">
+          <img src="assets/images/icons8-bhim.svg" alt="BHIM UPI" class="app-icon">
+          <span>BHIM UPI</span>
+        </button>
+        <button type="button" class="btn-upi-app any-upi" (click)="payViaApp('generic')">
+          <span style="font-size: 1.1rem;">⚡</span>
+          <span>Open Any Installed UPI App</span>
+        </button>
+      </div>
+
+      <div class="supported-apps">
+        <span>Supported: Google Pay • PhonePe • Paytm • BHIM • Cred • Any Bank UPI</span>
+      </div>
+    </div>
+
+    <!-- Right Column: Verification & Details Submission Form -->
+    <div class="portal-card">
+      <div class="card-title-group">
+        <h2 class="card-title">📝 Step 2: Fill Details & Submit</h2>
+        <p class="card-desc">Enter your payment UTR / Transaction ID to generate your verified digital acknowledgement slip.</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="donorName">Full Name <span class="req">*</span></label>
+            <input type="text" id="donorName" [(ngModel)]="formData.donor_name" name="donorName" placeholder="e.g. Rameshwar Patil" required minlength="2">
+          </div>
+          <div class="form-group">
+            <label for="donorPhone">WhatsApp / Mobile No. <span class="req">*</span></label>
+            <input type="tel" id="donorPhone" [(ngModel)]="formData.phone" name="donorPhone" placeholder="e.g. 9876543210" required minlength="10" maxlength="15">
+            <div class="input-hint">Receipt will be linked to this number</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="donorEmail">Email Address (Optional)</label>
+            <input type="email" id="donorEmail" [(ngModel)]="formData.email" name="donorEmail" placeholder="e.g. rameshwar@gmail.com">
+          </div>
+          <div class="form-group">
+            <label for="donorCity">City / State</label>
+            <input type="text" id="donorCity" [(ngModel)]="formData.city" name="donorCity" placeholder="e.g. Nagpur, Maharashtra">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="formAmount">Amount Paid (₹ INR) <span class="req">*</span></label>
+            <input type="number" id="formAmount" [(ngModel)]="formData.amount" (input)="onFormAmountInput()" name="formAmount" min="1" step="1" required>
+          </div>
+          <div class="form-group">
+            <label for="paymentMode">Payment App Used</label>
+            <select id="paymentMode" [(ngModel)]="formData.payment_mode" name="paymentMode">
+              <option value="Google Pay">Google Pay (GPay)</option>
+              <option value="PhonePe">PhonePe</option>
+              <option value="Paytm">Paytm UPI</option>
+              <option value="BHIM UPI">BHIM UPI</option>
+              <option value="Cred">Cred</option>
+              <option value="Other Bank UPI">Other Bank UPI / NetBanking</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="utrNumber">UPI Reference / UTR Number / Txn ID <span class="req">*</span></label>
+          <input type="text" id="utrNumber" [(ngModel)]="formData.utr_number" name="utrNumber" placeholder="12-digit UTR No. (e.g. 423589123456)" required minlength="4">
+          <div class="input-hint">Look in your GPay / PhonePe / Paytm payment receipt under "UPI Transaction ID" or "UTR"</div>
+        </div>
+
+        <div class="form-group">
+          <label for="donorMessage">Words of Support / Prayers for Nepal (Optional)</label>
+          <textarea id="donorMessage" [(ngModel)]="formData.message" name="donorMessage" rows="2" placeholder="Send your prayers, blessings, or message of solidarity..."></textarea>
+        </div>
+
+        <button type="submit" [disabled]="isSubmitting" class="btn-submit">
+          <span *ngIf="!isSubmitting">🙏 Submit Donation & Get Official Receipt</span>
+          <span *ngIf="isSubmitting">⏳ Recording Donation...</span>
+        </button>
+      </form>
+    </div>
+
+  </section>
+
+  <!-- Information / Transparency Guide Banner -->
+  <div class="info-banner-box">
+    <div class="info-icon">🤝</div>
+    <div class="info-text">
+      <h4>100% Transparent & Community Driven</h4>
+      <p>All funds collected through this official portal are directly utilized by Vidarbha Dhol Tasha Pathak for on-ground relief materials, dry food rations, medicines, and winter supplies dispatched to affected regions in Nepal. Every contribution is publicly acknowledged and verifiable.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal for Instant Digital Receipt -->
+<div class="modal-backdrop" *ngIf="showReceipt">
+  <div class="modal-content">
+    <button type="button" class="modal-close" (click)="closeReceipt()">&times;</button>
+    
+    <!-- Receipt Paper View -->
+    <div class="receipt-paper" *ngIf="receiptData">
+      <div class="receipt-header">
+        <div class="receipt-logo">🥁</div>
+        <div class="receipt-org-title">विदर्भ ढोल ताशा पथक</div>
+        <div class="receipt-org-sub">Vidarbha Dhol Tasha Pathak • Nagpur, Maharashtra</div>
+        <div class="receipt-badge">OFFICIAL DONATION RECEIPT</div>
+      </div>
+
+      <div class="receipt-meta-grid">
+        <div class="receipt-meta-item">
+          <span class="lbl">Receipt Number</span>
+          <span class="val highlight">{{ receiptData.receipt_no }}</span>
+        </div>
+        <div class="receipt-meta-item">
+          <span class="lbl">Date & Time</span>
+          <span class="val">{{ receiptData.created_at | date:'dd MMM yyyy, hh:mm a' }}</span>
+        </div>
+        <div class="receipt-meta-item">
+          <span class="lbl">Cause / Purpose</span>
+          <span class="val">Nepal Tragedy Humanitarian Relief</span>
+        </div>
+        <div class="receipt-meta-item">
+          <span class="lbl">Payment Mode</span>
+          <span class="val">{{ receiptData.payment_mode || 'UPI' }}</span>
+        </div>
+      </div>
+
+      <div class="receipt-amount-highlight">
+        <div style="font-size: 0.75rem; color: #78350f; font-weight: 700; text-transform: uppercase;">Amount Contributed</div>
+        <div class="r-amt">₹{{ receiptData.amount | number }}</div>
+        <div style="font-size: 0.8rem; color: #92400e; font-weight: 600;">{{ receiptData.amountInWords }}</div>
+      </div>
+
+      <div class="receipt-details-table">
+        <div class="r-row">
+          <span class="r-k">Donor Name:</span>
+          <span class="r-v" style="font-weight: 700;">{{ receiptData.donor_name }}</span>
+        </div>
+        <div class="r-row">
+          <span class="r-k">Contact / WhatsApp:</span>
+          <span class="r-v">{{ receiptData.phone }}</span>
+        </div>
+        <div class="r-row" *ngIf="receiptData.email">
+          <span class="r-k">Email:</span>
+          <span class="r-v">{{ receiptData.email }}</span>
+        </div>
+        <div class="r-row" *ngIf="receiptData.city">
+          <span class="r-k">City / State:</span>
+          <span class="r-v">{{ receiptData.city }}</span>
+        </div>
+        <div class="r-row">
+          <span class="r-k">UPI Reference / UTR:</span>
+          <span class="r-v font-mono">{{ receiptData.utr_number }}</span>
+        </div>
+        <div class="r-row" *ngIf="receiptData.message">
+          <span class="r-k">Donor Message:</span>
+          <span class="r-v" style="font-style: italic;">"{{ receiptData.message }}"</span>
+        </div>
+      </div>
+
+      <div class="receipt-seal">
+        <div class="receipt-stamp">VERIFIED ACKNOWLEDGEMENT</div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.7rem; color: #64748b;">Authorized Signatory</div>
+          <div style="font-weight: 700; font-size: 0.8rem; color: #0f172a;">Vidarbha Dhol Tasha Pathak</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="receipt-actions">
+      <button type="button" class="btn-print" (click)="printReceipt()">
+        <span>🖨️</span> Download / Print PDF
+      </button>
+      <button type="button" class="btn-share-wa" (click)="shareOnWhatsApp()">
+        <span>💬</span> Share on WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-box" [class.show]="showToast">
+  <span>🔔</span> <span>{{ toastMessage }}</span>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-content">
+    <p style="font-weight: 700; color: #fff; font-size: 1rem;">🚩 विदर्भ ढोल ताशा पथक • Vidarbha Dhol Tasha Pathak</p>
+    <p>Dedicated to Indian Culture, Social Service, and Humanitarian Support.</p>
+    <p style="margin-top: 14px; font-size: 0.75rem;">
+      For inquiries & verification: <a routerLink="/admin">Admin Portal</a> • Transparency Ledger • Nagpur, Maharashtra, India
+    </p>
+  </div>
+</footer>

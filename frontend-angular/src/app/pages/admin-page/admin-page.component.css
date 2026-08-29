@@ -1,0 +1,4 @@
+/* Admin Page Specific Styling */
+:host {
+  display: block;
+}

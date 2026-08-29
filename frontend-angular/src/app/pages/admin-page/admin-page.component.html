@@ -1,0 +1,210 @@
+<!-- Admin Navigation Bar -->
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="dhol-icon-badge">🔒</div>
+    <div class="brand-text">
+      <h2>Admin Control Portal</h2>
+      <span>Vidarbha Dhol Tasha Pathak • Nepal Relief Ledger</span>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <a routerLink="/" class="nav-btn">← Public Portal</a>
+    <button *ngIf="isAuthenticated" type="button" class="nav-btn" (click)="refresh()" [disabled]="isLoading">
+      🔄 Refresh
+    </button>
+    <button *ngIf="isAuthenticated" type="button" class="nav-btn" style="background: rgba(220, 38, 38, 0.2); border-color: #dc2626; color: #fca5a5;" (click)="logout()">
+      🚪 Log Out
+    </button>
+  </div>
+</nav>
+
+<div class="container" style="max-width: 1300px;">
+
+  <!-- Login Card (Shown if not authenticated) -->
+  <section *ngIf="!isAuthenticated" class="admin-login-box">
+    <div style="font-size: 2.5rem; margin-bottom: 10px;">🛡️</div>
+    <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Admin Authentication</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">
+      Enter the secure administrator secret key to manage, verify, and export relief fund transactions.
+    </p>
+
+    <!-- Error Alert -->
+    <div *ngIf="errorMessage" class="error-msg-box">
+      ⚠️ {{ errorMessage }}
+    </div>
+
+    <!-- Password Input with Toggle -->
+    <div class="admin-password-wrapper">
+      <input 
+        [type]="isPasswordVisible ? 'text' : 'password'" 
+        id="adminSecretInput" 
+        [(ngModel)]="secretKey" 
+        (keyup.enter)="login()"
+        placeholder="Enter Admin Secret Key" 
+        autocomplete="current-password"
+      >
+      <button 
+        type="button" 
+        class="pwd-toggle-btn" 
+        (click)="togglePasswordVisibility()" 
+        [title]="isPasswordVisible ? 'Hide secret' : 'Show secret'"
+      >
+        <span>{{ isPasswordVisible ? '🙈' : '👁️' }}</span>
+      </button>
+    </div>
+
+    <button type="button" class="btn-submit" (click)="login()" [disabled]="isLoading">
+      <span *ngIf="!isLoading">🔓 Access Verification Dashboard</span>
+      <span *ngIf="isLoading">Verifying Key...</span>
+    </button>
+
+    <div style="margin-top: 18px; font-size: 0.75rem; color: var(--text-dim);">
+      Default Key: <code style="color: var(--primary-gold); cursor: pointer; text-decoration: underline;" (click)="fillDefaultKey()" title="Click to auto-fill">vidarbha&#64;admin2026</code>
+      (Configured via <code>ADMIN_SECRET</code> in backend environment)
+    </div>
+  </section>
+
+  <!-- Authenticated Dashboard -->
+  <section *ngIf="isAuthenticated">
+
+    <!-- KPI Summary Metrics -->
+    <div class="admin-kpi-grid">
+      <div class="kpi-card highlight-gold">
+        <div class="kpi-label">Total Contributions</div>
+        <div class="kpi-val">₹{{ totalFunds | number }}</div>
+        <div class="kpi-sub">Total gross received</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Transactions</div>
+        <div class="kpi-val">{{ totalTransactions }}</div>
+        <div class="kpi-sub">All logged submissions</div>
+      </div>
+      <div class="kpi-card highlight-green">
+        <div class="kpi-label">Verified Donations</div>
+        <div class="kpi-val">{{ verifiedCount }} <span style="font-size: 1rem; font-weight: normal; color: #6ee7b7;">(₹{{ verifiedAmount | number }})</span></div>
+        <div class="kpi-sub">Bank credited & reconciled</div>
+      </div>
+      <div class="kpi-card highlight-red">
+        <div class="kpi-label">Pending Verification</div>
+        <div class="kpi-val">{{ pendingCount }} <span style="font-size: 1rem; font-weight: normal; color: #fca5a5;">(₹{{ pendingAmount | number }})</span></div>
+        <div class="kpi-sub">Awaiting bank check</div>
+      </div>
+    </div>
+
+    <!-- Search & Action Toolbar -->
+    <div class="admin-toolbar">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="applyFilter()" 
+          placeholder="Search by Donor Name, UTR / Txn ID, Mobile, City, Receipt No..."
+        >
+      </div>
+
+      <div class="admin-toolbar-actions">
+        <!-- Filter Tabs -->
+        <div class="filter-pills">
+          <button 
+            type="button" 
+            class="filter-pill" 
+            [class.active]="currentFilter === 'all'" 
+            (click)="setFilter('all')"
+          >
+            All ({{ allDonations.length }})
+          </button>
+          <button 
+            type="button" 
+            class="filter-pill" 
+            [class.active]="currentFilter === 'pending'" 
+            (click)="setFilter('pending')"
+          >
+            Pending ({{ pendingCount }})
+          </button>
+          <button 
+            type="button" 
+            class="filter-pill" 
+            [class.active]="currentFilter === 'verified'" 
+            (click)="setFilter('verified')"
+          >
+            Verified ({{ verifiedCount }})
+          </button>
+        </div>
+
+        <button type="button" class="btn-export" (click)="exportCsv()">
+          <span>📊</span> Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Transactions Data Table Card -->
+    <div class="portal-card" style="padding: 20px; overflow-x: auto;">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Receipt / Date</th>
+            <th>Donor Details</th>
+            <th>Amount & App</th>
+            <th>UTR / Transaction Ref</th>
+            <th>Status</th>
+            <th style="text-align: center;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of filteredDonations">
+            <td>
+              <div class="receipt-code" (click)="copyText(item.receipt_no, 'Receipt No')" title="Click to copy">
+                {{ item.receipt_no }}
+              </div>
+              <div class="table-date">{{ item.created_at | date:'dd MMM yyyy, hh:mm a' }}</div>
+            </td>
+            <td>
+              <div class="donor-title">{{ item.donor_name }}</div>
+              <div class="table-contact">
+                <span>📞 {{ item.phone }}</span>
+                <span *ngIf="item.city"> • 📍 {{ item.city }}</span>
+              </div>
+              <div *ngIf="item.email" class="table-contact">✉️ {{ item.email }}</div>
+              <div *ngIf="item.message" class="table-note">"{{ item.message }}"</div>
+            </td>
+            <td>
+              <div class="amount-bold">₹{{ item.amount | number }}</div>
+              <div class="badge-app">{{ item.payment_mode || 'UPI' }}</div>
+            </td>
+            <td>
+              <div class="utr-code" (click)="copyText(item.utr_number, 'UTR Number')" title="Click to copy">
+                {{ item.utr_number }}
+              </div>
+              <div class="input-hint" style="font-size: 0.7rem;">Click to copy</div>
+            </td>
+            <td>
+              <span class="status-badge" [class.verified]="item.is_verified" [class.pending]="!item.is_verified">
+                {{ item.is_verified ? '✓ Verified' : '⏳ Pending' }}
+              </span>
+            </td>
+            <td style="text-align: center;">
+              <button 
+                type="button" 
+                class="btn-toggle-verify" 
+                [class.btn-unverify]="item.is_verified" 
+                (click)="toggleVerify(item.id)"
+              >
+                {{ item.is_verified ? 'Unverify' : 'Verify' }}
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredDonations.length === 0">
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-dim);">
+              <div style="font-size: 2rem; margin-bottom: 8px;">📭</div>
+              <div>No transactions found matching your criteria.</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </section>
+
+</div>

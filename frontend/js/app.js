@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         utr_number: document.getElementById('utrNumber').value.trim(),
         payment_mode: document.getElementById('paymentMode').value,
         message: document.getElementById('donorMessage').value.trim() || null,
-        is_anonymous: document.getElementById('isAnonymous').checked
+        is_anonymous: document.getElementById('isAnonymous') ? document.getElementById('isAnonymous').checked : false
       };
 
       try {

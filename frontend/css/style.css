@@ -537,44 +537,58 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
   text-decoration: none;
-  color: #fff;
 }
 
 .btn-upi-app:hover {
   transform: translateY(-2px);
-  filter: brightness(1.15);
+  filter: brightness(1.05);
   text-decoration: none;
+}
+
+.btn-upi-app .app-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .btn-upi-app.gpay {
   background: #ffffff;
   color: #1f2937;
   border-color: #e5e7eb;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.12);
 }
 
 .btn-upi-app.phonepe {
-  background: linear-gradient(135deg, #6739b7, #5f259f);
-  box-shadow: 0 4px 12px rgba(103, 57, 183, 0.35);
+  background: #ffffff;
+  color: #5f259f;
+  border-color: #e9d5ff;
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15);
 }
 
 .btn-upi-app.paytm {
-  background: linear-gradient(135deg, #00b9f5, #002e6e);
-  box-shadow: 0 4px 12px rgba(0, 185, 245, 0.35);
+  background: #ffffff;
+  color: #002e6e;
+  border-color: #bae6fd;
+  box-shadow: 0 4px 12px rgba(0, 185, 245, 0.15);
 }
 
 .btn-upi-app.bhim {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+  background: #ffffff;
+  color: #1f2937;
+  border-color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.12);
 }
 
 .btn-upi-app.any-upi {
   grid-column: 1 / -1;
   background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
   padding: 14px;
   font-size: 1rem;
   box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);

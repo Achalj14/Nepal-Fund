@@ -253,6 +253,14 @@ export class DonorPageComponent implements OnInit, OnDestroy {
     this.showReceipt = false;
   }
 
+  openReceiptModal(): void {
+    if (!this.receiptData) {
+      this.displayToast('Please complete or submit donation first.');
+      return;
+    }
+    this.showReceipt = true;
+  }
+
   downloadReceipt(): void {
     if (!this.receiptData) {
       alert('No receipt details available to download.');
@@ -446,42 +454,33 @@ export class DonorPageComponent implements OnInit, OnDestroy {
       const safeReceiptNo = (this.receiptData.receipt_no || 'VDTP-Receipt').replace(/[^a-zA-Z0-9_-]/g, '_');
       const filename = `Donation-Receipt-${safeReceiptNo}.png`;
 
-      // Always open image save preview modal for mobile devices (especially iPhone/Safari)
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      if (isMobile) {
-        this.showImageSaveModal = true;
-      }
-
-      // Try Web Share API (native share on iOS / Android to Save to Photos)
-      canvas.toBlob(async (blob) => {
-        if (blob && (navigator as any).canShare) {
-          const file = new File([blob], filename, { type: 'image/png' });
-          if ((navigator as any).canShare({ files: [file] })) {
-            try {
-              await navigator.share({
-                files: [file],
-                title: 'Official Donation Receipt',
-                text: `Donation Receipt - ${this.receiptData.receipt_no}`
-              });
-              this.displayToast('Receipt saved / shared! 📸');
-              return;
-            } catch (err: any) {
-              // User cancelled share
-            }
-          }
-        }
-
-        // If not mobile, or if share was cancelled / unsupported, trigger file download
-        if (!isMobile) {
+      // 1. Direct PNG File Download to device
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const blobUrl = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        } else {
           const link = document.createElement('a');
           link.href = dataUrl;
           link.download = filename;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          this.displayToast('Receipt image downloaded! 📥');
         }
+        this.displayToast('Receipt PNG downloaded to your device! 📥');
       }, 'image/png');
+
+      // 2. If on mobile (iOS/Android), also show the image preview modal for easy photo saving
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        this.showImageSaveModal = true;
+      }
 
     } catch (error) {
       console.error('Failed to generate receipt image:', error);

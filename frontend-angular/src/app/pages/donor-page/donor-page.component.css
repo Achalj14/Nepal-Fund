@@ -367,11 +367,12 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.receipt-download-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  user-select: auto;
-  -webkit-user-select: auto;
-  -webkit-touch-callout: default;
+/* Ensure modal backdrop is on top and visible */
+.modal-backdrop {
+  z-index: 99999 !important;
+}
+
+.modal-backdrop.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }

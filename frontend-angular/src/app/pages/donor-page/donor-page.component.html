@@ -319,7 +319,7 @@
             <button type="button" class="btn-download-direct" (click)="downloadReceipt()">
               📥 Download Receipt
             </button>
-            <button type="button" class="btn-view-direct" (click)="showReceipt = true">
+            <button type="button" class="btn-view-direct" (click)="openReceiptModal()">
               👁️ View Receipt
             </button>
           </div>
@@ -341,7 +341,7 @@
 </div>
 
 <!-- Modal for Instant Digital Receipt -->
-<div class="modal-backdrop" *ngIf="showReceipt">
+<div class="modal-backdrop active" *ngIf="showReceipt">
   <div class="modal-content">
     <button type="button" class="modal-close" (click)="closeReceipt()">&times;</button>
     
@@ -431,7 +431,7 @@
 </div>
 
 <!-- Mobile Save Image Modal (for iPhone Safari and Android) -->
-<div class="modal-backdrop" *ngIf="showImageSaveModal">
+<div class="modal-backdrop active" *ngIf="showImageSaveModal">
   <div class="modal-content image-save-modal">
     <button type="button" class="modal-close" (click)="showImageSaveModal = false">&times;</button>
     

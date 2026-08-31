@@ -8,6 +8,7 @@ from fastapi.responses import StreamingResponse, JSONResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
+import razorpay
 from app.config import settings
 from app.database import engine, Base, get_db
 from app.models import Donation
@@ -17,6 +18,8 @@ from app.schemas import (
     DonationReceiptResponse,
     CampaignStats,
     AdminDonationResponse,
+    RazorpayOrderCreate,
+    RazorpayPaymentVerify,
 )
 import app.crud as crud
 
@@ -65,7 +68,8 @@ def get_campaign_config():
         "payee_name": settings.PAYEE_NAME,
         "upi_id": settings.UPI_ID,
         "target_amount": settings.TARGET_AMOUNT,
-        "currency": settings.CURRENCY
+        "currency": settings.CURRENCY,
+        "razorpay_key_id": settings.RAZORPAY_KEY_ID
     }
 
 
@@ -125,6 +129,101 @@ def get_receipt(receipt_no_or_id: str, db: Session = Depends(get_db)):
         "payee_name": settings.PAYEE_NAME,
         "upi_id": settings.UPI_ID
     }
+
+
+# ==========================================
+# RAZORPAY PAYMENT GATEWAY ENDPOINTS
+# ==========================================
+
+@app.post("/api/payment/create-order")
+def create_razorpay_order(payload: RazorpayOrderCreate):
+    """Creates a Razorpay Order for online payments."""
+    if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
+        raise HTTPException(
+            status_code=500,
+            detail="Razorpay API keys are not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in backend/.env"
+        )
+    try:
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+        order_amount_paise = int(round(payload.amount * 100))
+        order_data = {
+            "amount": order_amount_paise,
+            "currency": "INR",
+            "payment_capture": 1
+        }
+        order = client.order.create(data=order_data)
+        return {
+            "order_id": order["id"],
+            "amount": payload.amount,
+            "currency": "INR",
+            "key_id": settings.RAZORPAY_KEY_ID
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to create Razorpay order: {str(e)}")
+
+
+@app.post("/api/payment/verify")
+def verify_razorpay_payment(payload: RazorpayPaymentVerify, db: Session = Depends(get_db)):
+    """Cryptographically verifies Razorpay signature, records donation, and generates receipt."""
+    if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
+        raise HTTPException(
+            status_code=500,
+            detail="Razorpay API keys are not configured. Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in backend/.env"
+        )
+
+    client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+    try:
+        client.utility.verify_payment_signature({
+            'razorpay_order_id': payload.razorpay_order_id,
+            'razorpay_payment_id': payload.razorpay_payment_id,
+            'razorpay_signature': payload.razorpay_signature
+        })
+    except razorpay.errors.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid Razorpay signature. Verification failed.")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Signature verification error: {str(e)}")
+
+    donation_data = DonationCreate(
+        donor_name=payload.donor_name,
+        phone=payload.phone,
+        email=payload.email,
+        city=payload.city,
+        amount=payload.amount,
+        utr_number=payload.razorpay_payment_id,
+        payment_mode="Razorpay",
+        message=payload.message,
+        is_anonymous=payload.is_anonymous or False
+    )
+
+    try:
+        new_donation = crud.create_donation(db, donation_data)
+        return {
+            "success": True,
+            "message": "Payment verified and contribution recorded successfully!",
+            "receipt_no": new_donation.receipt_no,
+            "donation_id": new_donation.id,
+            "receipt": {
+                "id": new_donation.id,
+                "receipt_no": new_donation.receipt_no,
+                "donor_name": new_donation.donor_name,
+                "phone": new_donation.phone,
+                "email": new_donation.email,
+                "city": new_donation.city,
+                "amount": new_donation.amount,
+                "utr_number": new_donation.utr_number,
+                "payment_mode": new_donation.payment_mode,
+                "message": new_donation.message,
+                "is_anonymous": new_donation.is_anonymous,
+                "is_verified": new_donation.is_verified,
+                "created_at": new_donation.created_at.strftime("%d %b %Y, %I:%M %p") if new_donation.created_at else "",
+                "campaign_title": settings.CAMPAIGN_TITLE,
+                "payee_name": settings.PAYEE_NAME,
+                "upi_id": settings.UPI_ID
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to record verified donation: {str(e)}")
+
 
 
 # ==========================================

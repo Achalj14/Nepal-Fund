@@ -44,24 +44,12 @@ fs.writeFileSync(prodApiPath, prodConfig, 'utf8');
 // 4. Generate environment.ts (for local development)
 const devApiPath = path.join(__dirname, 'src/environments/environment.ts');
 let devConfig;
-if (explicitApiUrl) {
-  devConfig = `export const environment = {
+devConfig = `export const environment = {
   production: false,
-  apiUrl: '${explicitApiUrl}'
+  apiUrl: ''
 };
 `;
-  console.log(`[set-env] Using custom backend for local dev: "${explicitApiUrl}"`);
-} else {
-  devConfig = `const isLocalhost = typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-
-export const environment = {
-  production: false,
-  apiUrl: isLocalhost ? 'http://127.0.0.1:8000' : 'https://nepal-fund.onrender.com'
-};
-`;
-  console.log(`[set-env] Using dynamic hostname detection for local dev (localhost -> http://127.0.0.1:8000)`);
-}
+console.log(`[set-env] Configured relative API URLs for dev proxy`);
 fs.writeFileSync(devApiPath, devConfig, 'utf8');
 
 console.log(`[set-env] Generated environment files successfully!`);

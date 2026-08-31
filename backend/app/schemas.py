@@ -76,3 +76,18 @@ class AdminDonationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class RazorpayOrderCreate(BaseModel):
+    amount: float = Field(..., gt=0, description="Amount in INR")
+
+class RazorpayPaymentVerify(BaseModel):
+    razorpay_order_id: str = Field(..., description="Razorpay Order ID")
+    razorpay_payment_id: str = Field(..., description="Razorpay Payment ID")
+    razorpay_signature: str = Field(..., description="Razorpay Signature")
+    donor_name: str = Field(..., min_length=2, max_length=255)
+    phone: str = Field(..., min_length=10, max_length=15)
+    email: Optional[str] = Field(None, max_length=255)
+    city: Optional[str] = Field(None, max_length=100)
+    amount: float = Field(..., gt=0)
+    message: Optional[str] = Field(None, max_length=1000)
+    is_anonymous: Optional[bool] = False

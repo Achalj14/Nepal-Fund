@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
-import { CampaignConfig, CampaignStats, DonationCreatePayload, DonationResponse } from '../models/donation.model';
+import { CampaignConfig, CampaignStats, DonationCreatePayload, DonationResponse, RazorpayOrderResponse, RazorpayVerifyPayload } from '../models/donation.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -38,6 +38,14 @@ export class DonationService {
 
   submitDonation(payload: DonationCreatePayload): Observable<DonationResponse> {
     return this.http.post<DonationResponse>(`${this.apiUrl}/api/donations`, payload);
+  }
+
+  createRazorpayOrder(amount: number): Observable<RazorpayOrderResponse> {
+    return this.http.post<RazorpayOrderResponse>(`${this.apiUrl}/api/payment/create-order`, { amount });
+  }
+
+  verifyRazorpayPayment(payload: RazorpayVerifyPayload): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/payment/verify`, payload);
   }
 
   buildUpiUrl(upiId: string, payeeName: string, amount: number, note = 'Nepal Relief - Vidarbha Dhol Tasha'): string {

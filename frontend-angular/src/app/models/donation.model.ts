@@ -4,6 +4,27 @@ export interface CampaignConfig {
   campaign_title: string;
   target_amount: number;
   currency: string;
+  razorpay_key_id?: string;
+}
+
+export interface RazorpayOrderResponse {
+  order_id: string;
+  amount: number;
+  currency: string;
+  key_id: string;
+}
+
+export interface RazorpayVerifyPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  donor_name: string;
+  phone: string;
+  email?: string | null;
+  city?: string | null;
+  amount: number;
+  message?: string | null;
+  is_anonymous?: boolean;
 }
 
 export interface CampaignStats {

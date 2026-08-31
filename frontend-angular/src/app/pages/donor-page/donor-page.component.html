@@ -110,6 +110,39 @@
         </button>
       </div>
 
+      <!-- Razorpay Instant Online Payment Option -->
+      <div class="razorpay-card">
+        <div class="razorpay-card-header">
+          <span class="razorpay-tag">⚡ Instant Online Payment</span>
+          <span class="razorpay-badge-instant">Auto-Verified Receipt</span>
+        </div>
+        <button 
+          type="button" 
+          class="btn-razorpay-checkout" 
+          (click)="payWithRazorpay()"
+          [disabled]="isProcessingRazorpay"
+          id="btnRazorpayPay"
+        >
+          <div class="btn-razorpay-content">
+            <span class="btn-razorpay-icon">💳</span>
+            <span *ngIf="!isProcessingRazorpay">
+              Pay ₹{{ currentAmount | number }} with Razorpay
+            </span>
+            <span *ngIf="isProcessingRazorpay">
+              Processing Payment...
+            </span>
+          </div>
+          <span class="btn-razorpay-arrow">➔</span>
+        </button>
+        <div class="razorpay-card-features">
+          <span>Cards (Visa, Master, RuPay) • Net Banking • UPI • Wallets</span>
+        </div>
+      </div>
+
+      <div class="method-divider">
+        <span>OR PAY MANUALLY VIA UPI QR CODE</span>
+      </div>
+
       <!-- Dynamic QR Display -->
       <div class="qr-box-wrapper">
         <div id="qrcode" *ngIf="qrDataUrl">
@@ -198,26 +231,62 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="formAmount">Amount Paid (₹ INR) <span class="req">*</span></label>
-            <input type="number" id="formAmount" [(ngModel)]="formData.amount" (input)="onFormAmountInput()" name="formAmount" min="1" step="1" required>
+            <label for="formAmount">
+              Amount Paid (₹ INR) <span class="req">*</span>
+              <span *ngIf="isPaymentCompleted" class="locked-badge">🔒 Locked</span>
+            </label>
+            <input 
+              type="number" 
+              id="formAmount" 
+              [(ngModel)]="formData.amount" 
+              (input)="onFormAmountInput()" 
+              name="formAmount" 
+              min="1" 
+              step="1" 
+              required
+              [readonly]="isPaymentCompleted"
+              [class.input-locked]="isPaymentCompleted"
+            >
           </div>
           <div class="form-group">
-            <label for="paymentMode">Payment App Used</label>
-            <select id="paymentMode" [(ngModel)]="formData.payment_mode" name="paymentMode">
+            <label for="paymentMode">Payment App / Mode</label>
+            <select id="paymentMode" [(ngModel)]="formData.payment_mode" name="paymentMode" [disabled]="isPaymentCompleted">
               <option value="Google Pay">Google Pay (GPay)</option>
               <option value="PhonePe">PhonePe</option>
               <option value="Paytm">Paytm UPI</option>
               <option value="BHIM UPI">BHIM UPI</option>
               <option value="Cred">Cred</option>
+              <option value="Razorpay Online">Razorpay (Cards / Netbanking / UPI)</option>
               <option value="Other Bank UPI">Other Bank UPI / NetBanking</option>
             </select>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="utrNumber">UPI Reference / UTR Number / Txn ID <span class="req">*</span></label>
-          <input type="text" id="utrNumber" [(ngModel)]="formData.utr_number" name="utrNumber" placeholder="12-digit UTR No. (e.g. 423589123456)" required minlength="4">
-          <div class="input-hint">Look in your GPay / PhonePe / Paytm payment receipt under "UPI Transaction ID" or "UTR"</div>
+          <label for="utrNumber">
+            UPI Reference / UTR Number / Txn ID <span class="req">*</span>
+            <span *ngIf="isUtrLocked" class="locked-badge">🔒 Auto-captured & Verified</span>
+          </label>
+          <div class="input-with-badge">
+            <input 
+              type="text" 
+              id="utrNumber" 
+              [(ngModel)]="formData.utr_number" 
+              name="utrNumber" 
+              placeholder="12-digit UTR No. (e.g. 423589123456)" 
+              required 
+              minlength="4"
+              [readonly]="isUtrLocked"
+              [class.input-locked]="isUtrLocked"
+            >
+            <span *ngIf="isUtrLocked" class="input-lock-icon">✓</span>
+          </div>
+          <div *ngIf="isUtrLocked" class="input-hint hint-success">
+            ✨ Verified Payment Transaction ID auto-captured from Razorpay. Field is locked and non-editable.
+          </div>
+          <div *ngIf="!isUtrLocked" class="input-hint">
+            Look in your GPay / PhonePe / Paytm payment receipt under "UPI Transaction ID" or "UTR"
+          </div>
         </div>
 
         <div class="form-group">
@@ -225,9 +294,17 @@
           <textarea id="donorMessage" [(ngModel)]="formData.message" name="donorMessage" rows="2" placeholder="Send your prayers, blessings, or message of solidarity..."></textarea>
         </div>
 
-        <button type="submit" [disabled]="isSubmitting" class="btn-submit">
-          <span *ngIf="!isSubmitting">🙏 Submit Donation & Get Official Receipt</span>
-          <span *ngIf="isSubmitting">⏳ Recording Donation...</span>
+        <div class="quick-razorpay-prompt" *ngIf="!isPaymentCompleted">
+          <p>Don't want to copy & paste UTR? Pay online for instant verified receipt:</p>
+          <button type="button" class="btn-quick-razorpay" (click)="payWithRazorpay()" [disabled]="isProcessingRazorpay">
+            ⚡ Pay ₹{{ currentAmount | number }} via Razorpay
+          </button>
+        </div>
+
+        <button type="submit" [disabled]="isSubmitting" class="btn-submit" [class.btn-view-receipt]="isPaymentCompleted">
+          <span *ngIf="isPaymentCompleted">📜 View Official Verified Receipt (Paid ₹{{ formData.amount }})</span>
+          <span *ngIf="!isPaymentCompleted && !isSubmitting">🙏 Submit Donation & Get Official Receipt</span>
+          <span *ngIf="!isPaymentCompleted && isSubmitting">⏳ Recording Donation...</span>
         </button>
       </form>
     </div>

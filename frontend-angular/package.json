@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "ng": "node ./node_modules/@angular/cli/bin/bootstrap.js",
-    "start": "node set-env.js && node ./node_modules/@angular/cli/bin/bootstrap.js serve",
+    "start": "node set-env.js && node ./node_modules/@angular/cli/bin/bootstrap.js serve --port 4300 --host 0.0.0.0 --proxy-config proxy.conf.json --disable-host-check",
     "build": "node set-env.js && node ./node_modules/@angular/cli/bin/bootstrap.js build",
     "watch": "node ./node_modules/@angular/cli/bin/bootstrap.js build --watch --configuration development"
   },

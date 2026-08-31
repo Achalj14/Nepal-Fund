@@ -19,6 +19,10 @@ class Settings(BaseSettings):
     # Security / Admin Access
     ADMIN_SECRET: str = os.getenv("ADMIN_SECRET", "vidarbha@admin2026")
     
+    # Razorpay Payment Gateway
+    RAZORPAY_KEY_ID: str = os.getenv("RAZORPAY_KEY_ID", "")
+    RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "")
+
     # CORS (Allows frontend to talk to backend across different domains/ports)
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "*")
 

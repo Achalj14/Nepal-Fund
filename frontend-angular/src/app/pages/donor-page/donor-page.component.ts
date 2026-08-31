@@ -53,6 +53,7 @@ export class DonorPageComponent implements OnInit, OnDestroy {
   // UI States
   isSubmitting = false;
   isProcessingRazorpay = false;
+  isRetrievingPayment = false;
   isUtrLocked = false;
   isPaymentCompleted = false;
   razorpayKeyId = '';
@@ -238,6 +239,18 @@ export class DonorPageComponent implements OnInit, OnDestroy {
           amountInWords: this.donationService.convertNumberToWords(payload.amount)
         };
         this.showReceipt = true;
+
+        // Clear form fields after successful submission as requested
+        this.formData.donor_name = '';
+        this.formData.phone = '';
+        this.formData.email = '';
+        this.formData.city = '';
+        this.formData.utr_number = '';
+        this.formData.message = '';
+        this.formData.payment_mode = 'Google Pay';
+        this.formData.amount = this.currentAmount;
+        this.isUtrLocked = false;
+        this.isPaymentCompleted = false;
 
         // Refresh stats
         this.fetchStats();
@@ -643,7 +656,9 @@ export class DonorPageComponent implements OnInit, OnDestroy {
   }
 
   private handleRazorpaySuccess(paymentResponse: any, amount: number): void {
-    this.displayToast('Payment successful! Verifying and recording your receipt...');
+    this.isRetrievingPayment = true;
+    this.isProcessingRazorpay = true;
+    this.displayToast('Payment captured! Retrieving verified details...');
 
     const payload = {
       razorpay_order_id: paymentResponse.razorpay_order_id,
@@ -660,6 +675,7 @@ export class DonorPageComponent implements OnInit, OnDestroy {
 
     this.donationService.verifyRazorpayPayment(payload).subscribe({
       next: (res) => {
+        this.isRetrievingPayment = false;
         this.isProcessingRazorpay = false;
         this.displayToast('Payment verified successfully! 🙏');
 
@@ -686,6 +702,7 @@ export class DonorPageComponent implements OnInit, OnDestroy {
         this.fetchStats();
       },
       error: (err) => {
+        this.isRetrievingPayment = false;
         this.isProcessingRazorpay = false;
         alert(`Payment verification failed: ${err.error?.detail || err.message}\nRazorpay Payment ID: ${paymentResponse.razorpay_payment_id}`);
       }

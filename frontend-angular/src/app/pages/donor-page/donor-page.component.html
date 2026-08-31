@@ -200,6 +200,15 @@
 
     <!-- Right Column: Verification & Details Submission Form -->
     <div class="portal-card">
+      <!-- Loading Overlay while retrieving / verifying payment details -->
+      <div class="form-loader-overlay" *ngIf="isRetrievingPayment">
+        <div class="loader-spinner-box">
+          <div class="spinner-ring"></div>
+          <div class="loader-title">⚡ Retrieving Payment Details...</div>
+          <p class="loader-subtitle">Confirming your payment transaction and auto-capturing your verified transaction ID.</p>
+        </div>
+      </div>
+
       <div class="card-title-group">
         <h2 class="card-title">📝 Step 2: Fill Details & Submit</h2>
         <p class="card-desc">Enter your payment UTR / Transaction ID to generate your verified digital acknowledgement slip.</p>

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://nepal-fund.onrender.com'
+  apiUrl: 'http://127.0.0.1:8085'
 };

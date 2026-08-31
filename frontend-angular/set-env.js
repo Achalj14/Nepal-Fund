@@ -33,8 +33,7 @@ const explicitApiUrl = (process.env.API_URL || process.env.BACKEND_URL || '').tr
 
 // 3. Generate environment.prod.ts
 const prodApiPath = path.join(__dirname, 'src/environments/environment.prod.ts');
-const isLocalAddress = explicitApiUrl.includes('localhost') || explicitApiUrl.includes('127.0.0.1') || explicitApiUrl.includes('192.168.') || explicitApiUrl.includes('10.');
-const prodUrl = (!isLocalAddress && explicitApiUrl) ? explicitApiUrl : 'https://nepal-fund.onrender.com';
+const prodUrl = explicitApiUrl || 'https://nepal-fund.onrender.com';
 const prodConfig = `export const environment = {
   production: true,
   apiUrl: '${prodUrl}'
@@ -45,34 +44,12 @@ fs.writeFileSync(prodApiPath, prodConfig, 'utf8');
 // 4. Generate environment.ts (for local development)
 const devApiPath = path.join(__dirname, 'src/environments/environment.ts');
 let devConfig;
-if (explicitApiUrl) {
-  devConfig = `export const environment = {
+devConfig = `export const environment = {
   production: false,
-  apiUrl: '${explicitApiUrl}'
+  apiUrl: ''
 };
 `;
-  console.log(`[set-env] Using custom backend for local dev: "${explicitApiUrl}"`);
-} else {
-  devConfig = `const getApiUrl = (): string => {
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname;
-    if (host === 'localhost' || host === '127.0.0.1') {
-      return 'http://127.0.0.1:8000';
-    }
-    return \`http://\${host}:8000\`;
-  }
-  return 'http://127.0.0.1:8000';
-};
-
-export const environment = {
-  production: false,
-  get apiUrl(): string {
-    return getApiUrl();
-  }
-};
-`;
-  console.log(`[set-env] Using dynamic hostname detection for local dev`);
-}
+console.log(`[set-env] Configured relative API URLs for dev proxy`);
 fs.writeFileSync(devApiPath, devConfig, 'utf8');
 
 console.log(`[set-env] Generated environment files successfully!`);

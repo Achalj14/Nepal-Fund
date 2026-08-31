@@ -110,6 +110,39 @@
         </button>
       </div>
 
+      <!-- Razorpay Instant Online Payment Option -->
+      <div class="razorpay-card">
+        <div class="razorpay-card-header">
+          <span class="razorpay-tag">⚡ Instant Online Payment</span>
+          <span class="razorpay-badge-instant">Auto-Verified Receipt</span>
+        </div>
+        <button 
+          type="button" 
+          class="btn-razorpay-checkout" 
+          (click)="payWithRazorpay()"
+          [disabled]="isProcessingRazorpay"
+          id="btnRazorpayPay"
+        >
+          <div class="btn-razorpay-content">
+            <span class="btn-razorpay-icon">💳</span>
+            <span *ngIf="!isProcessingRazorpay">
+              Pay ₹{{ currentAmount | number }} with Razorpay
+            </span>
+            <span *ngIf="isProcessingRazorpay">
+              Processing Payment...
+            </span>
+          </div>
+          <span class="btn-razorpay-arrow">➔</span>
+        </button>
+        <div class="razorpay-card-features">
+          <span>Cards (Visa, Master, RuPay) • Net Banking • UPI • Wallets</span>
+        </div>
+      </div>
+
+      <div class="method-divider">
+        <span>OR PAY MANUALLY VIA UPI QR CODE</span>
+      </div>
+
       <!-- Dynamic QR Display -->
       <div class="qr-box-wrapper">
         <div id="qrcode" *ngIf="qrDataUrl">
@@ -167,14 +200,18 @@
 
     <!-- Right Column: Verification & Details Submission Form -->
     <div class="portal-card">
+      <!-- Loading Overlay while retrieving / verifying payment details -->
+      <div class="form-loader-overlay" *ngIf="isRetrievingPayment">
+        <div class="loader-spinner-box">
+          <div class="spinner-ring"></div>
+          <div class="loader-title">⚡ Retrieving Payment Details...</div>
+          <p class="loader-subtitle">Confirming your payment transaction and auto-capturing your verified transaction ID.</p>
+        </div>
+      </div>
+
       <div class="card-title-group">
-        <h2 class="card-title">📝 Step 2: Donor Details & Confirmation</h2>
-        <p class="card-desc" *ngIf="!isManualUtrMode">
-          Enter your details and click below to complete your contribution securely via <strong>UPI, GPay, PhonePe, Paytm, or NetBanking</strong>.
-        </p>
-        <p class="card-desc" *ngIf="isManualUtrMode">
-          Enter your 12-digit UPI UTR / Transaction ID for administrative verification against bank records.
-        </p>
+        <h2 class="card-title">📝 Step 2: Fill Details & Submit</h2>
+        <p class="card-desc">Enter your payment UTR / Transaction ID to generate your verified digital acknowledgement slip.</p>
       </div>
 
       <form (ngSubmit)="onSubmit()">
@@ -203,27 +240,62 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="formAmount">Amount to Donate (₹ INR) <span class="req">*</span></label>
-            <input type="number" id="formAmount" [(ngModel)]="formData.amount" (input)="onFormAmountInput()" name="formAmount" min="1" step="1" required>
+            <label for="formAmount">
+              Amount Paid (₹ INR) <span class="req">*</span>
+              <span *ngIf="isPaymentCompleted" class="locked-badge">🔒 Locked</span>
+            </label>
+            <input 
+              type="number" 
+              id="formAmount" 
+              [(ngModel)]="formData.amount" 
+              (input)="onFormAmountInput()" 
+              name="formAmount" 
+              min="1" 
+              step="1" 
+              required
+              [readonly]="isPaymentCompleted"
+              [class.input-locked]="isPaymentCompleted"
+            >
           </div>
-          <div class="form-group" *ngIf="isManualUtrMode">
-            <label for="paymentMode">Payment App Used</label>
-            <select id="paymentMode" [(ngModel)]="formData.payment_mode" name="paymentMode">
+          <div class="form-group">
+            <label for="paymentMode">Payment App / Mode</label>
+            <select id="paymentMode" [(ngModel)]="formData.payment_mode" name="paymentMode" [disabled]="isPaymentCompleted">
               <option value="Google Pay">Google Pay (GPay)</option>
               <option value="PhonePe">PhonePe</option>
               <option value="Paytm">Paytm UPI</option>
               <option value="BHIM UPI">BHIM UPI</option>
               <option value="Cred">Cred</option>
+              <option value="Razorpay Online">Razorpay (Cards / Netbanking / UPI)</option>
               <option value="Other Bank UPI">Other Bank UPI / NetBanking</option>
             </select>
           </div>
         </div>
 
-        <!-- Manual Mode UTR input -->
-        <div class="form-group" *ngIf="isManualUtrMode">
-          <label for="utrNumber">12-Digit UPI Reference / UTR Number <span class="req">*</span></label>
-          <input type="text" id="utrNumber" [(ngModel)]="formData.utr_number" name="utrNumber" placeholder="12-digit UTR No. (e.g. 423589123456)" required minlength="10" maxlength="22">
-          <div class="input-hint">Required for manual audit against bank credits</div>
+        <div class="form-group">
+          <label for="utrNumber">
+            UPI Reference / UTR Number / Txn ID <span class="req">*</span>
+            <span *ngIf="isUtrLocked" class="locked-badge">🔒 Auto-captured & Verified</span>
+          </label>
+          <div class="input-with-badge">
+            <input 
+              type="text" 
+              id="utrNumber" 
+              [(ngModel)]="formData.utr_number" 
+              name="utrNumber" 
+              placeholder="12-digit UTR No. (e.g. 423589123456)" 
+              required 
+              minlength="4"
+              [readonly]="isUtrLocked"
+              [class.input-locked]="isUtrLocked"
+            >
+            <span *ngIf="isUtrLocked" class="input-lock-icon">✓</span>
+          </div>
+          <div *ngIf="isUtrLocked" class="input-hint hint-success">
+            ✨ Verified Payment Transaction ID auto-captured from Razorpay. Field is locked and non-editable.
+          </div>
+          <div *ngIf="!isUtrLocked" class="input-hint">
+            Look in your GPay / PhonePe / Paytm payment receipt under "UPI Transaction ID" or "UTR"
+          </div>
         </div>
 
         <div class="form-group">
@@ -231,34 +303,36 @@
           <textarea id="donorMessage" [(ngModel)]="formData.message" name="donorMessage" rows="2" placeholder="Send your prayers, blessings, or message of solidarity..."></textarea>
         </div>
 
-        <!-- Automated Gateway Primary Button -->
-        <div *ngIf="!isManualUtrMode">
-          <button type="submit" [disabled]="isSubmitting" class="btn-submit">
-            <span *ngIf="!isSubmitting">🔒 Pay ₹{{ formData.amount || currentAmount | number }} & Get Instant Verified Receipt</span>
-            <span *ngIf="isSubmitting">⏳ Launching Secure Bank Gateway...</span>
+        <div class="quick-razorpay-prompt" *ngIf="!isPaymentCompleted">
+          <p>Don't want to copy & paste UTR? Pay online for instant verified receipt:</p>
+          <button type="button" class="btn-quick-razorpay" (click)="payWithRazorpay()" [disabled]="isProcessingRazorpay">
+            ⚡ Pay ₹{{ currentAmount | number }} via Razorpay
           </button>
-          <div style="margin-top: 14px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
-            Direct QR transfer?
-            <a href="javascript:void(0)" (click)="toggleManualMode()" style="color: var(--primary-saffron-light); font-weight: 600; text-decoration: underline;">
-              Submit UTR for manual audit
-            </a>
-          </div>
         </div>
 
-        <!-- Manual Audit Submission Button -->
-        <div *ngIf="isManualUtrMode">
-          <button type="submit" [disabled]="isSubmitting" class="btn-submit" style="background: linear-gradient(135deg, #d97706, #b45309);">
-            <span *ngIf="!isSubmitting">📋 Submit UTR for Admin Audit</span>
-            <span *ngIf="isSubmitting">⏳ Submitting for Audit...</span>
-          </button>
-          <div style="margin-top: 14px; text-align: center; font-size: 0.8rem; color: #94a3b8;">
-            Prefer instant 1-tap bank confirmation?
-            <a href="javascript:void(0)" (click)="toggleManualMode()" style="color: var(--primary-saffron-light); font-weight: 600; text-decoration: underline;">
-              ← Return to Automated Gateway
-            </a>
+        <button type="submit" [disabled]="isSubmitting" class="btn-submit">
+          <span *ngIf="isSubmitting">⏳ Storing Donation Details in Database...</span>
+          <span *ngIf="!isSubmitting && isPaymentCompleted">💾 Submit Donation Details to Database & Get Official Receipt</span>
+          <span *ngIf="!isSubmitting && !isPaymentCompleted">🙏 Submit Donation Details to Database & Get Official Receipt</span>
+        </button>
+
+        <div class="form-success-card" *ngIf="receiptData">
+          <div class="success-content">
+            <span class="success-icon">✅</span>
+            <div>
+              <h4>Recorded in Database!</h4>
+              <p>Receipt No: <strong style="color: #fff;">{{ receiptData.receipt_no }}</strong></p>
+            </div>
+          </div>
+          <div class="success-btn-group">
+            <button type="button" class="btn-download-direct" (click)="downloadReceipt()">
+              📥 Download Receipt
+            </button>
+            <button type="button" class="btn-view-direct" (click)="openReceiptModal()">
+              👁️ View Receipt
+            </button>
           </div>
         </div>
-
       </form>
     </div>
 
@@ -276,7 +350,7 @@
 </div>
 
 <!-- Modal for Instant Digital Receipt -->
-<div class="modal-backdrop" *ngIf="showReceipt">
+<div class="modal-backdrop active" *ngIf="showReceipt">
   <div class="modal-content">
     <button type="button" class="modal-close" (click)="closeReceipt()">&times;</button>
     
@@ -342,12 +416,7 @@
       </div>
 
       <div class="receipt-seal">
-        <div class="receipt-stamp" *ngIf="receiptData.is_verified" style="border-color: #10b981; color: #047857;">
-          VERIFIED ACKNOWLEDGEMENT
-        </div>
-        <div class="receipt-stamp pending" *ngIf="!receiptData.is_verified" style="border-color: #d97706; color: #b45309;">
-          PENDING AUDIT VERIFICATION
-        </div>
+        <div class="receipt-stamp">VERIFIED ACKNOWLEDGEMENT</div>
         <div style="text-align: right;">
           <div style="font-size: 0.7rem; color: #64748b;">Authorized Signatory</div>
           <div style="font-weight: 700; font-size: 0.8rem; color: #0f172a;">Vidarbha Dhol Tasha Pathak</div>
@@ -357,11 +426,45 @@
 
     <!-- Action Buttons -->
     <div class="receipt-actions">
+      <button type="button" class="btn-download" (click)="downloadReceipt()">
+        <span>📥</span> Download Receipt
+      </button>
       <button type="button" class="btn-print" (click)="printReceipt()">
-        <span>🖨️</span> Download / Print PDF
+        <span>🖨️</span> Print PDF
       </button>
       <button type="button" class="btn-share-wa" (click)="shareOnWhatsApp()">
-        <span>💬</span> Share on WhatsApp
+        <span>💬</span> WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Save Image Modal (for iPhone Safari and Android) -->
+<div class="modal-backdrop active" *ngIf="showImageSaveModal">
+  <div class="modal-content image-save-modal">
+    <button type="button" class="modal-close" (click)="showImageSaveModal = false">&times;</button>
+    
+    <div class="image-save-header">
+      <h3 style="margin: 0 0 6px 0; color: #ff6b00;">Official Donation Receipt</h3>
+      <div class="mobile-save-hint">
+        📱 <strong>To Save on iPhone / Mobile:</strong><br>
+        Tap and hold the receipt image below, then tap <strong>"Save to Photos"</strong> or <strong>"Save Image"</strong>.
+      </div>
+    </div>
+
+    <div class="image-preview-wrapper" *ngIf="receiptImageUrl">
+      <img [src]="receiptImageUrl" alt="Donation Receipt" class="receipt-download-img">
+    </div>
+
+    <div class="receipt-actions" style="margin-top: 14px;">
+      <button type="button" class="btn-download" (click)="triggerNativeShare()">
+        <span>📲</span> Save / Share Image
+      </button>
+      <button type="button" class="btn-print" (click)="printReceipt()">
+        <span>🖨️</span> Print PDF
+      </button>
+      <button type="button" class="btn-share-wa" (click)="shareOnWhatsApp()">
+        <span>💬</span> WhatsApp
       </button>
     </div>
   </div>

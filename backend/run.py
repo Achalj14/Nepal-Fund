@@ -1,5 +1,7 @@
 import uvicorn
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import sys
 
 # Ensure backend root is on python path

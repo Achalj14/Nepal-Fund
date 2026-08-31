@@ -1,7 +1,17 @@
-const isLocalhost = typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const getApiUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://127.0.0.1:8000';
+    }
+    return `http://${host}:8000`;
+  }
+  return 'http://127.0.0.1:8000';
+};
 
 export const environment = {
   production: false,
-  apiUrl: isLocalhost ? 'http://127.0.0.1:8000' : 'https://nepal-fund.onrender.com'
+  get apiUrl(): string {
+    return getApiUrl();
+  }
 };

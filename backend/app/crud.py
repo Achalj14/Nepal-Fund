@@ -12,7 +12,7 @@ def generate_receipt_number(db: Session) -> str:
     next_id = count + 1
     return f"VDTP-NPL-{year}-{next_id:04d}"
 
-def create_donation(db: Session, donation_in: DonationCreate) -> Donation:
+def create_donation(db: Session, donation_in: DonationCreate, is_verified: bool = False) -> Donation:
     receipt_no = generate_receipt_number(db)
     
     db_donation = Donation(
@@ -27,7 +27,7 @@ def create_donation(db: Session, donation_in: DonationCreate) -> Donation:
         payment_screenshot=donation_in.payment_screenshot,
         message=donation_in.message.strip() if donation_in.message else None,
         is_anonymous=donation_in.is_anonymous or False,
-        is_verified=True # Auto-verify or leave for admin
+        is_verified=is_verified
     )
     db.add(db_donation)
     db.commit()

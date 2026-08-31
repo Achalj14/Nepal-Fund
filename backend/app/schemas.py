@@ -76,3 +76,30 @@ class AdminDonationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class OrderCreateRequest(BaseModel):
+    amount: float = Field(..., gt=0, description="Amount in INR")
+    donor_name: str = Field(..., min_length=2)
+    phone: str = Field(..., min_length=10)
+    email: Optional[str] = None
+
+class OrderResponse(BaseModel):
+    order_id: str
+    amount: int
+    currency: str
+    key_id: str
+    is_mock: bool = False
+
+class PaymentVerifyRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    donor_name: str = Field(..., min_length=2)
+    phone: str = Field(..., min_length=10)
+    email: Optional[str] = None
+    city: Optional[str] = None
+    amount: float = Field(..., gt=0)
+    payment_mode: Optional[str] = "UPI / Razorpay"
+    message: Optional[str] = None
+    is_anonymous: Optional[bool] = False
+

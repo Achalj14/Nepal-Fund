@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of } from 'rxjs';
-import { CampaignConfig, CampaignStats, DonationCreatePayload, DonationResponse } from '../models/donation.model';
+import { CampaignConfig, CampaignStats, DonationCreatePayload, DonationResponse, OrderCreatePayload, OrderResponse, PaymentVerifyPayload } from '../models/donation.model';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -34,6 +34,14 @@ export class DonationService {
         return of(null);
       })
     );
+  }
+
+  createOrder(payload: OrderCreatePayload): Observable<OrderResponse> {
+    return this.http.post<OrderResponse>(`${this.apiUrl}/api/payment/create-order`, payload);
+  }
+
+  verifyPayment(payload: PaymentVerifyPayload): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/api/payment/verify-payment`, payload);
   }
 
   submitDonation(payload: DonationCreatePayload): Observable<DonationResponse> {

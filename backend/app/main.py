@@ -17,8 +17,12 @@ from app.schemas import (
     DonationReceiptResponse,
     CampaignStats,
     AdminDonationResponse,
+    OrderCreateRequest,
+    OrderResponse,
+    PaymentVerifyRequest,
 )
 import app.crud as crud
+import app.payment as payment_gateway
 
 # Create database tables automatically
 Base.metadata.create_all(bind=engine)
@@ -78,16 +82,87 @@ def get_stats(db: Session = Depends(get_db)):
 @app.post("/api/donations", status_code=201)
 def submit_donation(donation: DonationCreate, db: Session = Depends(get_db)):
     """Receives and records donor details with transaction UTR verification."""
+    existing = db.query(Donation).filter(Donation.utr_number == donation.utr_number.strip()).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="This UPI Reference / UTR Number has already been submitted.")
     try:
-        new_donation = crud.create_donation(db, donation)
+        new_donation = crud.create_donation(db, donation, is_verified=False)
         return {
             "success": True,
-            "message": "Thank you for your generous contribution to the Nepal Relief Fund!",
+            "message": "Thank you for your generous contribution! Your receipt has been generated.",
             "receipt_no": new_donation.receipt_no,
             "donation_id": new_donation.id
         }
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to record donation: {str(e)}")
+
+
+@app.post("/api/payment/create-order", response_model=OrderResponse)
+def create_payment_order(req: OrderCreateRequest):
+    """Creates an official Razorpay order for seamless 1-tap checkout."""
+    try:
+        order = payment_gateway.create_razorpay_order(
+            amount=req.amount,
+            currency="INR",
+            receipt=f"rcpt_{req.phone[-4:] if len(req.phone) >= 4 else '0000'}",
+            notes={"donor_name": req.donor_name, "phone": req.phone}
+        )
+        return {
+            "order_id": order["id"],
+            "amount": order["amount"],
+            "currency": order["currency"],
+            "key_id": settings.RAZORPAY_KEY_ID,
+            "is_mock": order.get("is_mock", False)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to initialize payment gateway: {str(e)}")
+
+
+@app.post("/api/payment/verify-payment")
+def verify_payment_and_record(req: PaymentVerifyRequest, db: Session = Depends(get_db)):
+    """
+    Cryptographically verifies the Razorpay payment signature.
+    Only if confirmed by the gateway, automatically creates the verified donation record.
+    """
+    is_valid = payment_gateway.verify_razorpay_signature(
+        order_id=req.razorpay_order_id,
+        payment_id=req.razorpay_payment_id,
+        signature=req.razorpay_signature
+    )
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid payment verification signature. No payment recorded.")
+    
+    # Check if payment_id has already been recorded
+    existing = db.query(Donation).filter(Donation.utr_number == req.razorpay_payment_id).first()
+    if existing:
+        return {
+            "success": True,
+            "receipt_no": existing.receipt_no,
+            "donation_id": existing.id,
+            "message": "Payment already verified and recorded."
+        }
+
+    # Automatically record verified donation in Supabase
+    donation_data = DonationCreate(
+        donor_name=req.donor_name,
+        phone=req.phone,
+        email=req.email,
+        city=req.city,
+        amount=req.amount,
+        utr_number=req.razorpay_payment_id,
+        payment_mode=req.payment_mode or "UPI (Razorpay)",
+        message=req.message,
+        is_anonymous=req.is_anonymous
+    )
+    new_donation = crud.create_donation(db, donation_data, is_verified=True)
+    
+    return {
+        "success": True,
+        "receipt_no": new_donation.receipt_no,
+        "donation_id": new_donation.id,
+        "message": "Payment verified by bank gateway! Official receipt generated."
+    }
+
 
 
 @app.get("/api/donations", response_model=List[DonationPublicResponse])

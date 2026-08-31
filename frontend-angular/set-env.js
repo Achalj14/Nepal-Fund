@@ -33,7 +33,8 @@ const explicitApiUrl = (process.env.API_URL || process.env.BACKEND_URL || '').tr
 
 // 3. Generate environment.prod.ts
 const prodApiPath = path.join(__dirname, 'src/environments/environment.prod.ts');
-const prodUrl = explicitApiUrl || 'https://nepal-fund.onrender.com';
+const isLocalAddress = explicitApiUrl.includes('localhost') || explicitApiUrl.includes('127.0.0.1') || explicitApiUrl.includes('192.168.') || explicitApiUrl.includes('10.');
+const prodUrl = (!isLocalAddress && explicitApiUrl) ? explicitApiUrl : 'https://nepal-fund.onrender.com';
 const prodConfig = `export const environment = {
   production: true,
   apiUrl: '${prodUrl}'
@@ -52,15 +53,25 @@ if (explicitApiUrl) {
 `;
   console.log(`[set-env] Using custom backend for local dev: "${explicitApiUrl}"`);
 } else {
-  devConfig = `const isLocalhost = typeof window !== 'undefined' && 
-  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+  devConfig = `const getApiUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://127.0.0.1:8000';
+    }
+    return \`http://\${host}:8000\`;
+  }
+  return 'http://127.0.0.1:8000';
+};
 
 export const environment = {
   production: false,
-  apiUrl: isLocalhost ? 'http://127.0.0.1:8000' : 'https://nepal-fund.onrender.com'
+  get apiUrl(): string {
+    return getApiUrl();
+  }
 };
 `;
-  console.log(`[set-env] Using dynamic hostname detection for local dev (localhost -> http://127.0.0.1:8000)`);
+  console.log(`[set-env] Using dynamic hostname detection for local dev`);
 }
 fs.writeFileSync(devApiPath, devConfig, 'utf8');
 

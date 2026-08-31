@@ -54,3 +54,33 @@ export interface DonationResponse {
   amount: number;
   created_at: string;
 }
+
+export interface OrderCreatePayload {
+  amount: number;
+  donor_name: string;
+  phone: string;
+  email?: string | null;
+}
+
+export interface OrderResponse {
+  order_id: string;
+  amount: number;
+  currency: string;
+  key_id: string;
+  is_mock?: boolean;
+}
+
+export interface PaymentVerifyPayload {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+  donor_name: string;
+  phone: string;
+  email?: string | null;
+  city?: string | null;
+  amount: number;
+  payment_mode?: string;
+  message?: string | null;
+  is_anonymous?: boolean;
+}
+

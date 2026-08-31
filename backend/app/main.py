@@ -12,6 +12,7 @@ import razorpay
 from app.config import settings
 from app.database import engine, Base, get_db
 from app.models import Donation
+import app.models as models
 from app.schemas import (
     DonationCreate,
     DonationPublicResponse,

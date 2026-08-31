@@ -227,3 +227,85 @@
   box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4) !important;
   border-color: rgba(52, 211, 153, 0.4) !important;
 }
+
+/* Direct Download Button in Modal */
+.btn-download {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 20px;
+  background: linear-gradient(135deg, #ff6b00 0%, #ea580c 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(255, 107, 0, 0.35);
+  transition: all 0.2s ease;
+}
+
+.btn-download:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.45);
+}
+
+/* Form Success Card */
+.form-success-card {
+  margin: 18px 0;
+  padding: 16px;
+  background: rgba(5, 150, 105, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-success-card .success-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-success-card .success-icon {
+  font-size: 1.8rem;
+}
+
+.form-success-card h4 {
+  color: #34d399;
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.form-success-card p {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  margin: 2px 0 0 0;
+}
+
+.btn-download-direct {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-download-direct:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}

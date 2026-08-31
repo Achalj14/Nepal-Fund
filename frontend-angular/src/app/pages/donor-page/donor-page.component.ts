@@ -260,6 +260,210 @@ export class DonorPageComponent implements OnInit, OnDestroy {
     this.showReceipt = false;
   }
 
+  downloadReceipt(): void {
+    if (!this.receiptData) {
+      alert('No receipt details available to download.');
+      return;
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 900;
+      canvas.height = 1250;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        this.printReceipt();
+        return;
+      }
+
+      // Background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 900, 1250);
+
+      // Outer Border
+      ctx.strokeStyle = '#ff6b00';
+      ctx.lineWidth = 8;
+      ctx.strokeRect(18, 18, 864, 1214);
+
+      // Inner Border
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(30, 30, 840, 1190);
+
+      // Header Brand Card
+      ctx.fillStyle = '#fff7ed';
+      ctx.fillRect(32, 32, 836, 175);
+
+      // Header Text
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#ff6b00';
+      ctx.font = 'bold 36px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('विदर्भ ढोल ताशा पथक', 450, 90);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.font = '600 19px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('VIDARBHA DHOL TASHA PATHAK • NAGPUR, MAHARASHTRA', 450, 125);
+
+      ctx.fillStyle = '#dc2626';
+      ctx.font = 'bold 17px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('NEPAL TRAGEDY HUMANITARIAN RELIEF FUND', 450, 155);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '14px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('Official Relief Donation Acknowledgment & Receipt', 450, 185);
+
+      // Receipt Badge Pill
+      ctx.fillStyle = '#ff6b00';
+      ctx.beginPath();
+      ctx.roundRect(270, 222, 360, 42, 21);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 17px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('OFFICIAL DONATION RECEIPT', 450, 249);
+
+      // Meta Cards
+      const drawCard = (x: number, y: number, w: number, h: number, label: string, val: string, isAccent = false) => {
+        ctx.fillStyle = isAccent ? '#fff7ed' : '#f8fafc';
+        ctx.fillRect(x, y, w, h);
+        ctx.strokeStyle = isAccent ? '#fed7aa' : '#e2e8f0';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, w, h);
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 12px "Segoe UI", Arial, sans-serif';
+        ctx.fillText(label.toUpperCase(), x + 16, y + 24);
+
+        ctx.fillStyle = isAccent ? '#ea580c' : '#0f172a';
+        ctx.font = isAccent ? 'bold 17px monospace' : '600 15px "Segoe UI", Arial, sans-serif';
+        ctx.fillText(val, x + 16, y + 52);
+      };
+
+      const dateStr = this.receiptData.created_at
+        ? new Date(this.receiptData.created_at).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : new Date().toLocaleDateString('en-IN');
+
+      drawCard(60, 285, 370, 70, 'Receipt Number', this.receiptData.receipt_no || 'VDTP-NPL-0001', true);
+      drawCard(470, 285, 370, 70, 'Date & Time', dateStr);
+      drawCard(60, 370, 370, 70, 'Cause / Purpose', 'Nepal Relief & Rehabilitation');
+      drawCard(470, 370, 370, 70, 'Payment Mode', this.receiptData.payment_mode || 'Razorpay / UPI');
+
+      // Amount Box
+      ctx.fillStyle = '#fef3c7';
+      ctx.fillRect(60, 465, 780, 115);
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(60, 465, 780, 115);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#92400e';
+      ctx.font = 'bold 14px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('CONTRIBUTION AMOUNT RECEIVED', 450, 498);
+
+      ctx.fillStyle = '#b45309';
+      ctx.font = 'bold 42px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(`₹${Number(this.receiptData.amount).toLocaleString('en-IN')}`, 450, 542);
+
+      ctx.fillStyle = '#78350f';
+      ctx.font = '600 15px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(this.receiptData.amountInWords || this.donationService.convertNumberToWords(this.receiptData.amount), 450, 568);
+
+      // Donor Information Rows
+      ctx.textAlign = 'left';
+      let rowY = 635;
+      const drawRow = (label: string, value: string, isMono = false) => {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '600 16px "Segoe UI", Arial, sans-serif';
+        ctx.fillText(label, 80, rowY);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = isMono ? 'bold 16px monospace' : '700 16px "Segoe UI", Arial, sans-serif';
+        ctx.fillText(value, 330, rowY);
+
+        ctx.strokeStyle = '#f1f5f9';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(80, rowY + 12);
+        ctx.lineTo(820, rowY + 12);
+        ctx.stroke();
+
+        rowY += 45;
+      };
+
+      drawRow('Donor Full Name:', this.receiptData.donor_name);
+      drawRow('Mobile / WhatsApp:', this.receiptData.phone);
+      if (this.receiptData.email) drawRow('Email Address:', this.receiptData.email);
+      if (this.receiptData.city) drawRow('City / State:', this.receiptData.city);
+      drawRow('Transaction ID / UTR:', this.receiptData.utr_number, true);
+      if (this.receiptData.message) {
+        drawRow('Donor Message:', `"${this.receiptData.message}"`);
+      }
+
+      // Stamp (Left Bottom)
+      ctx.save();
+      ctx.translate(170, 1075);
+      ctx.rotate(-0.05);
+      ctx.strokeStyle = '#059669';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(-100, -32, 200, 64);
+      ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+      ctx.fillRect(-100, -32, 200, 64);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#059669';
+      ctx.font = 'bold 15px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('★ VERIFIED ★', 0, -8);
+      ctx.font = 'bold 12px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('ACKNOWLEDGEMENT', 0, 12);
+      ctx.font = '10px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('VIDARBHA DHOL TASHA', 0, 24);
+      ctx.restore();
+
+      // Signatory (Right Bottom)
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#64748b';
+      ctx.font = '14px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('Authorized Signatory', 820, 1070);
+
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 18px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('Vidarbha Dhol Tasha Pathak', 820, 1095);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('Nagpur, Maharashtra, India', 820, 1115);
+
+      // Footnote
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px "Segoe UI", Arial, sans-serif';
+      ctx.fillText('Thank you for standing in solidarity with our brothers and sisters in Nepal 🇳🇵 🇮🇳', 450, 1175);
+      ctx.fillText('This is a verified computer-generated receipt.', 450, 1195);
+
+      // Download
+      const pngUrl = canvas.toDataURL('image/png');
+      const downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      const safeReceiptNo = (this.receiptData.receipt_no || 'VDTP-Receipt').replace(/[^a-zA-Z0-9_-]/g, '_');
+      downloadLink.download = `Donation-Receipt-${safeReceiptNo}.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+
+      this.displayToast('Receipt image downloaded successfully! 📥');
+    } catch (error) {
+      console.error('Failed to generate receipt image:', error);
+      this.printReceipt();
+    }
+  }
+
   printReceipt(): void {
     if (typeof window !== 'undefined') {
       window.print();

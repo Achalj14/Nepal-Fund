@@ -301,8 +301,21 @@
           </button>
         </div>
 
+        <div class="form-success-card" *ngIf="isPaymentCompleted && receiptData">
+          <div class="success-content">
+            <span class="success-icon">✅</span>
+            <div>
+              <h4>Contribution Verified & Submitted!</h4>
+              <p>Receipt No: <strong style="color: #fff;">{{ receiptData.receipt_no }}</strong></p>
+            </div>
+          </div>
+          <button type="button" class="btn-download-direct" (click)="downloadReceipt()">
+            📥 Download Receipt
+          </button>
+        </div>
+
         <button type="submit" [disabled]="isSubmitting" class="btn-submit" [class.btn-view-receipt]="isPaymentCompleted">
-          <span *ngIf="isPaymentCompleted">📜 View Official Verified Receipt (Paid ₹{{ formData.amount }})</span>
+          <span *ngIf="isPaymentCompleted">📜 View & Download Official Receipt</span>
           <span *ngIf="!isPaymentCompleted && !isSubmitting">🙏 Submit Donation & Get Official Receipt</span>
           <span *ngIf="!isPaymentCompleted && isSubmitting">⏳ Recording Donation...</span>
         </button>
@@ -399,11 +412,14 @@
 
     <!-- Action Buttons -->
     <div class="receipt-actions">
+      <button type="button" class="btn-download" (click)="downloadReceipt()">
+        <span>📥</span> Download Receipt
+      </button>
       <button type="button" class="btn-print" (click)="printReceipt()">
-        <span>🖨️</span> Download / Print PDF
+        <span>🖨️</span> Print PDF
       </button>
       <button type="button" class="btn-share-wa" (click)="shareOnWhatsApp()">
-        <span>💬</span> Share on WhatsApp
+        <span>💬</span> WhatsApp
       </button>
     </div>
   </div>

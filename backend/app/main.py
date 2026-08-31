@@ -83,7 +83,21 @@ def get_stats(db: Session = Depends(get_db)):
 def submit_donation(donation: DonationCreate, db: Session = Depends(get_db)):
     """Receives and records donor details with transaction UTR verification."""
     try:
-        new_donation = crud.create_donation(db, donation)
+        existing = db.query(models.Donation).filter(models.Donation.utr_number == donation.utr_number.strip()).first()
+        if existing:
+            existing.donor_name = donation.donor_name.strip()
+            existing.phone = donation.phone.strip()
+            if donation.email:
+                existing.email = donation.email.strip()
+            if donation.city:
+                existing.city = donation.city.strip()
+            if donation.message:
+                existing.message = donation.message.strip()
+            db.commit()
+            db.refresh(existing)
+            new_donation = existing
+        else:
+            new_donation = crud.create_donation(db, donation)
         return {
             "success": True,
             "message": "Thank you for your generous contribution to the Nepal Relief Fund!",
@@ -196,7 +210,23 @@ def verify_razorpay_payment(payload: RazorpayPaymentVerify, db: Session = Depend
     )
 
     try:
-        new_donation = crud.create_donation(db, donation_data)
+        existing = db.query(models.Donation).filter(models.Donation.utr_number == payload.razorpay_payment_id.strip()).first()
+        if existing:
+            if payload.donor_name:
+                existing.donor_name = payload.donor_name.strip()
+            if payload.phone:
+                existing.phone = payload.phone.strip()
+            if payload.email:
+                existing.email = payload.email.strip()
+            if payload.city:
+                existing.city = payload.city.strip()
+            if payload.message:
+                existing.message = payload.message.strip()
+            db.commit()
+            db.refresh(existing)
+            new_donation = existing
+        else:
+            new_donation = crud.create_donation(db, donation_data)
         return {
             "success": True,
             "message": "Payment verified and contribution recorded successfully!",

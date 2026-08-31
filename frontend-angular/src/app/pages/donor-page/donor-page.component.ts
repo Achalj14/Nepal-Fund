@@ -62,6 +62,8 @@ export class DonorPageComponent implements OnInit, OnDestroy {
 
   // Receipt Modal State
   showReceipt = false;
+  showImageSaveModal = false;
+  receiptImageUrl = '';
   receiptData: any = null;
 
   private pollInterval: any;
@@ -199,11 +201,6 @@ export class DonorPageComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(): void {
-    if (this.isPaymentCompleted) {
-      this.showReceipt = true;
-      return;
-    }
-
     if (!this.formData.donor_name || !this.formData.phone || !this.formData.utr_number || !this.formData.amount) {
       alert('Please fill in all required fields marked with *');
       return;
@@ -214,44 +211,40 @@ export class DonorPageComponent implements OnInit, OnDestroy {
     const payload: DonationCreatePayload = {
       donor_name: this.formData.donor_name.trim(),
       phone: this.formData.phone.trim(),
-      email: this.formData.email.trim() || null,
-      city: this.formData.city.trim() || null,
+      email: this.formData.email ? this.formData.email.trim() : null,
+      city: this.formData.city ? this.formData.city.trim() : null,
       amount: Number(this.formData.amount),
       utr_number: this.formData.utr_number.trim(),
-      payment_mode: this.formData.payment_mode,
-      message: this.formData.message.trim() || null,
+      payment_mode: this.formData.payment_mode || 'Razorpay Online',
+      message: this.formData.message ? this.formData.message.trim() : null,
       is_anonymous: false
     };
 
     this.donationService.submitDonation(payload).subscribe({
       next: (res) => {
         this.isSubmitting = false;
-        this.displayToast('Donation recorded successfully! 🙏');
+        this.isPaymentCompleted = true;
+        this.isUtrLocked = true;
+        this.displayToast('Donation details recorded in database successfully! 🙏');
 
         // Show Receipt
         this.receiptData = {
           ...payload,
-          receipt_no: res.receipt_no,
+          receipt_no: res.receipt_no || (this.receiptData ? this.receiptData.receipt_no : 'VDTP-NPL-0001'),
           payee_name: this.payeeName,
-          created_at: res.created_at || new Date().toISOString(),
+          created_at: res.created_at || (this.receiptData ? this.receiptData.created_at : new Date().toISOString()),
+          payment_mode: payload.payment_mode,
+          utr_number: payload.utr_number,
           amountInWords: this.donationService.convertNumberToWords(payload.amount)
         };
         this.showReceipt = true;
-
-        // Reset form
-        this.formData.donor_name = '';
-        this.formData.phone = '';
-        this.formData.email = '';
-        this.formData.city = '';
-        this.formData.utr_number = '';
-        this.formData.message = '';
 
         // Refresh stats
         this.fetchStats();
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert(`Submission Failed: ${err.error?.detail || err.message}\nPlease check your backend connection.`);
+        alert(`Submission Failed: ${err.error?.detail || err.message}\nPlease check your connection.`);
       }
     });
   }
@@ -447,21 +440,82 @@ export class DonorPageComponent implements OnInit, OnDestroy {
       ctx.fillText('Thank you for standing in solidarity with our brothers and sisters in Nepal 🇳🇵 🇮🇳', 450, 1175);
       ctx.fillText('This is a verified computer-generated receipt.', 450, 1195);
 
-      // Download
-      const pngUrl = canvas.toDataURL('image/png');
-      const downloadLink = document.createElement('a');
-      downloadLink.href = pngUrl;
+      // Generate Image
+      const dataUrl = canvas.toDataURL('image/png');
+      this.receiptImageUrl = dataUrl;
       const safeReceiptNo = (this.receiptData.receipt_no || 'VDTP-Receipt').replace(/[^a-zA-Z0-9_-]/g, '_');
-      downloadLink.download = `Donation-Receipt-${safeReceiptNo}.png`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
+      const filename = `Donation-Receipt-${safeReceiptNo}.png`;
 
-      this.displayToast('Receipt image downloaded successfully! 📥');
+      // Always open image save preview modal for mobile devices (especially iPhone/Safari)
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        this.showImageSaveModal = true;
+      }
+
+      // Try Web Share API (native share on iOS / Android to Save to Photos)
+      canvas.toBlob(async (blob) => {
+        if (blob && (navigator as any).canShare) {
+          const file = new File([blob], filename, { type: 'image/png' });
+          if ((navigator as any).canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: 'Official Donation Receipt',
+                text: `Donation Receipt - ${this.receiptData.receipt_no}`
+              });
+              this.displayToast('Receipt saved / shared! 📸');
+              return;
+            } catch (err: any) {
+              // User cancelled share
+            }
+          }
+        }
+
+        // If not mobile, or if share was cancelled / unsupported, trigger file download
+        if (!isMobile) {
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          this.displayToast('Receipt image downloaded! 📥');
+        }
+      }, 'image/png');
+
     } catch (error) {
       console.error('Failed to generate receipt image:', error);
       this.printReceipt();
     }
+  }
+
+  triggerNativeShare(): void {
+    if (!this.receiptImageUrl || !this.receiptData) {
+      this.downloadReceipt();
+      return;
+    }
+
+    fetch(this.receiptImageUrl)
+      .then(res => res.blob())
+      .then(async blob => {
+        const safeReceiptNo = (this.receiptData.receipt_no || 'VDTP-Receipt').replace(/[^a-zA-Z0-9_-]/g, '_');
+        const file = new File([blob], `Donation-Receipt-${safeReceiptNo}.png`, { type: 'image/png' });
+        if ((navigator as any).canShare && (navigator as any).canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'Official Donation Receipt',
+            text: `Donation Receipt - ${this.receiptData.receipt_no}`
+          });
+        } else {
+          const w = window.open();
+          if (w) {
+            w.document.write(`<img src="${this.receiptImageUrl}" style="max-width:100%;height:auto;"/>`);
+          }
+        }
+      })
+      .catch(err => {
+        console.error('Share error:', err);
+      });
   }
 
   printReceipt(): void {

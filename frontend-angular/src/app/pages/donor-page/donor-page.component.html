@@ -301,24 +301,29 @@
           </button>
         </div>
 
-        <div class="form-success-card" *ngIf="isPaymentCompleted && receiptData">
+        <button type="submit" [disabled]="isSubmitting" class="btn-submit">
+          <span *ngIf="isSubmitting">⏳ Storing Donation Details in Database...</span>
+          <span *ngIf="!isSubmitting && isPaymentCompleted">💾 Submit Donation Details to Database & Get Official Receipt</span>
+          <span *ngIf="!isSubmitting && !isPaymentCompleted">🙏 Submit Donation Details to Database & Get Official Receipt</span>
+        </button>
+
+        <div class="form-success-card" *ngIf="receiptData">
           <div class="success-content">
             <span class="success-icon">✅</span>
             <div>
-              <h4>Contribution Verified & Submitted!</h4>
+              <h4>Recorded in Database!</h4>
               <p>Receipt No: <strong style="color: #fff;">{{ receiptData.receipt_no }}</strong></p>
             </div>
           </div>
-          <button type="button" class="btn-download-direct" (click)="downloadReceipt()">
-            📥 Download Receipt
-          </button>
+          <div class="success-btn-group">
+            <button type="button" class="btn-download-direct" (click)="downloadReceipt()">
+              📥 Download Receipt
+            </button>
+            <button type="button" class="btn-view-direct" (click)="showReceipt = true">
+              👁️ View Receipt
+            </button>
+          </div>
         </div>
-
-        <button type="submit" [disabled]="isSubmitting" class="btn-submit" [class.btn-view-receipt]="isPaymentCompleted">
-          <span *ngIf="isPaymentCompleted">📜 View & Download Official Receipt</span>
-          <span *ngIf="!isPaymentCompleted && !isSubmitting">🙏 Submit Donation & Get Official Receipt</span>
-          <span *ngIf="!isPaymentCompleted && isSubmitting">⏳ Recording Donation...</span>
-        </button>
       </form>
     </div>
 
@@ -414,6 +419,37 @@
     <div class="receipt-actions">
       <button type="button" class="btn-download" (click)="downloadReceipt()">
         <span>📥</span> Download Receipt
+      </button>
+      <button type="button" class="btn-print" (click)="printReceipt()">
+        <span>🖨️</span> Print PDF
+      </button>
+      <button type="button" class="btn-share-wa" (click)="shareOnWhatsApp()">
+        <span>💬</span> WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile Save Image Modal (for iPhone Safari and Android) -->
+<div class="modal-backdrop" *ngIf="showImageSaveModal">
+  <div class="modal-content image-save-modal">
+    <button type="button" class="modal-close" (click)="showImageSaveModal = false">&times;</button>
+    
+    <div class="image-save-header">
+      <h3 style="margin: 0 0 6px 0; color: #ff6b00;">Official Donation Receipt</h3>
+      <div class="mobile-save-hint">
+        📱 <strong>To Save on iPhone / Mobile:</strong><br>
+        Tap and hold the receipt image below, then tap <strong>"Save to Photos"</strong> or <strong>"Save Image"</strong>.
+      </div>
+    </div>
+
+    <div class="image-preview-wrapper" *ngIf="receiptImageUrl">
+      <img [src]="receiptImageUrl" alt="Donation Receipt" class="receipt-download-img">
+    </div>
+
+    <div class="receipt-actions" style="margin-top: 14px;">
+      <button type="button" class="btn-download" (click)="triggerNativeShare()">
+        <span>📲</span> Save / Share Image
       </button>
       <button type="button" class="btn-print" (click)="printReceipt()">
         <span>🖨️</span> Print PDF

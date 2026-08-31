@@ -309,3 +309,69 @@
   background: #059669;
   transform: translateY(-1px);
 }
+
+.success-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-view-direct {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-view-direct:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* Image Save Modal for Mobile */
+.image-save-modal {
+  max-width: 520px;
+  width: 92%;
+  padding: 20px;
+  text-align: center;
+}
+
+.mobile-save-hint {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px dashed #f59e0b;
+  color: #fef08a;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  margin: 10px 0;
+  text-align: left;
+}
+
+.image-preview-wrapper {
+  max-height: 52vh;
+  overflow-y: auto;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  margin: 12px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.receipt-download-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  user-select: auto;
+  -webkit-user-select: auto;
+  -webkit-touch-callout: default;
+}
